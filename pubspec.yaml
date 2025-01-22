@@ -1,0 +1,71 @@
+name: alphabet_voice
+description: "A new Flutter project."
+
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.6.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_tts: ^3.6.3 # Use the latest version available
+  speech_to_text: ^5.5.3 # Use the latest version available
+  audioplayers: ^3.0.1
+
+
+
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/
+    - assets/background1.jpg
+    - assets/alphabet.png
+    - assets/backgroundimage.jpg
+    - assets/alphabets/a.png
+    - assets/alphabets/b.png
+    - assets/alphabets/c.png
+    - assets/alphabets/d.png
+    - assets/alphabets/e.png
+    - assets/alphabets/f.png
+    - assets/alphabets/g.png
+    - assets/alphabets/h.png
+    - assets/alphabets/i.png
+    - assets/alphabets/j.png
+    - assets/alphabets/k.png
+    - assets/alphabets/l.png
+    - assets/alphabets/m.png
+    - assets/alphabets/n.png
+    - assets/alphabets/o.png
+    - assets/alphabets/p.png
+    - assets/alphabets/q.png
+    - assets/alphabets/r.png
+    - assets/alphabets/s.png
+    - assets/alphabets/t.png
+    - assets/alphabets/u.png
+    - assets/alphabets/v.png
+    - assets/alphabets/w.png
+    - assets/alphabets/x.png
+    - assets/alphabets/y.png
+    - assets/alphabets/z.png
+    - assets/home-screen/abc.png
+    - assets/home-screen/voice.png
+    - assets/alphabet-sounds/
+
+
+
+dependency_overrides:
+  speech_to_text:
+    git:
+      url: https://github.com/csdcorp/speech_to_text.git
+      path: speech_to_text
