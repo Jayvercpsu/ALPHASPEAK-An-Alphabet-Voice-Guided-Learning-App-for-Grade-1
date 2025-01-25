@@ -74,13 +74,13 @@ class HomeScreen extends StatelessWidget {
                   // Pronunciation Checker Button
                   _buildImageButton(
                     context,
-                    text: "Pronunciation Checker",
-                    imagePath: 'assets/home-screen/voice.png',
+                    text: "Matching Letters",
+                    imagePath: 'assets/home-screen/matching.png',
                     onPressed: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => PronunciationCheckerScreen()),
+                            builder: (context) => MatchingLettersScreen()),
                       );
                     },
                   ),

@@ -51,8 +51,12 @@ flutter:
     - assets/alphabets/y.png
     - assets/alphabets/z.png
     - assets/home-screen/abc.png
-    - assets/home-screen/voice.png
+    - assets/home-screen/matching.png
     - assets/alphabet-sounds/
+    - assets/alphabet-sounds/wrong.mp3
+    - assets/alphabet-sounds/correct.mp3
+    - assets/matching-letters/
+
 dependency_overrides:
   speech_to_text:
     git:

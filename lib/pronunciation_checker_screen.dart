@@ -1,75 +1,198 @@
-// pronunciation_checker_screen.dart
 import 'package:flutter/material.dart';
-import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:flutter_tts/flutter_tts.dart';
+import 'package:audioplayers/audioplayers.dart';
+import 'dart:math';
 
-class PronunciationCheckerScreen extends StatefulWidget {
+class MatchingLettersScreen extends StatefulWidget {
   @override
-  _PronunciationCheckerScreenState createState() =>
-      _PronunciationCheckerScreenState();
+  _MatchingLettersScreenState createState() => _MatchingLettersScreenState();
 }
 
-class _PronunciationCheckerScreenState
-    extends State<PronunciationCheckerScreen> {
-  final stt.SpeechToText _speechToText = stt.SpeechToText();
-  bool _isListening = false;
-  String _feedback = '';
-  String _currentLetter = 'A'; // Default letter to check.
+class _MatchingLettersScreenState extends State<MatchingLettersScreen>
+    with SingleTickerProviderStateMixin {
+  final FlutterTts flutterTts = FlutterTts();
+  final Random _random = Random();
+  final AudioPlayer _audioPlayer = AudioPlayer();
+
+  String _targetLetter = 'A';
+  List<String> _squareLetters = [];
+  Map<String, bool?> _letterStates = {};
+  bool _isAnimating = false;
 
   @override
   void initState() {
     super.initState();
-    _initSpeech();
+    _randomizeLetters();
+    _speakTargetLetter();
   }
 
-  Future<void> _initSpeech() async {
-    await _speechToText.initialize();
+  /// Randomize letters in the grid
+  void _randomizeLetters() {
+    Set<String> lettersSet = {};
+    while (lettersSet.length < 4) {
+      lettersSet.add(String.fromCharCode(_random.nextInt(26) + 65)); // A-Z
+    }
+
+    _squareLetters = lettersSet.toList();
+    _targetLetter = _squareLetters[_random.nextInt(4)];
+    _letterStates = {
+      for (var letter in _squareLetters) letter: null, // Reset states
+    };
+    setState(() {});
   }
 
-  void _startListening() async {
-    setState(() {
-      _isListening = true;
-      _feedback = '';
-    });
+  /// Speak the target letter
+  Future<void> _speakTargetLetter() async {
+    await flutterTts.speak('Select the letter $_targetLetter');
+  }
 
-    await _speechToText.listen(onResult: (result) {
-      String userInput = result.recognizedWords;
+  /// Play audio for correct/wrong selection
+  Future<void> _playAudio(String path) async {
+    try {
+      await _audioPlayer.setSource(AssetSource(path)); // Set audio source
+      await _audioPlayer.resume(); // Play the audio
+    } catch (e) {
+      print("Error playing audio: $e");
+    }
+  }
+
+  /// Handle user selection
+  Future<void> _handleSelection(String selectedLetter) async {
+    if (_isAnimating) return;
+
+    if (selectedLetter == _targetLetter) {
       setState(() {
-        _feedback = userInput.toLowerCase() == _currentLetter.toLowerCase()
-            ? 'Correct'
-            : 'Incorrect';
+        _letterStates[selectedLetter] = true;
+        _isAnimating = true;
       });
-    });
+      await _playAudio('alphabet-sounds/correct.mp3');
+      await flutterTts.speak('Correct!');
+      await Future.delayed(Duration(seconds: 1));
+      _randomizeLetters();
+      _speakTargetLetter();
+      _isAnimating = false;
+    } else {
+      setState(() {
+        _letterStates[selectedLetter] = false;
+      });
+      await _playAudio('alphabet-sounds/wrong.mp3');
+      await flutterTts.speak('Wrong!');
+      await Future.delayed(Duration(milliseconds: 500));
+      setState(() {
+        _letterStates[selectedLetter] = null;
+      });
+    }
+  }
 
-    setState(() => _isListening = false);
+  @override
+  void dispose() {
+    flutterTts.stop();
+    _audioPlayer.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Pronunciation Checker')),
-      body: Center(
+      appBar: AppBar(
+        title: Text('Matching Letters'),
+        backgroundColor: Colors.pinkAccent,
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/background1.jpg'),
+            fit: BoxFit.cover,
+          ),
+        ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              'Say: $_currentLetter',
-              style: TextStyle(fontSize: 24),
+            // Center the Grid
+            Expanded(
+              child: Center(
+                child: GridView.builder(
+                  shrinkWrap: true, // Center the grid in available space
+                  padding: EdgeInsets.all(16.0),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 16,
+                    crossAxisSpacing: 16,
+                    childAspectRatio: 1.0,
+                  ),
+                  itemCount: _squareLetters.length,
+                  itemBuilder: (context, index) {
+                    return _buildSquareButton(_squareLetters[index]);
+                  },
+                ),
+              ),
             ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _isListening ? null : _startListening,
-              child: Text(_isListening ? 'Listening...' : 'Start Speaking'),
-            ),
-            SizedBox(height: 20),
-            Text(
-              _feedback,
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                color: _feedback == 'Correct' ? Colors.green : Colors.red,
+            // "Select the letter" Text Below Grid
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                'Select: $_targetLetter',
+                style: TextStyle(
+                  fontSize: 48,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black45,
+                      blurRadius: 10,
+                      offset: Offset(2, 2),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  /// Square Button with animation and feedback
+  Widget _buildSquareButton(String letter) {
+    final state = _letterStates[letter];
+    final color = state == null
+        ? Colors.pinkAccent
+        : state
+        ? Colors.green
+        : Colors.red;
+
+    return GestureDetector(
+      onTap: () => _handleSelection(letter),
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.3),
+              blurRadius: 8,
+              offset: Offset(2, 2),
+            ),
+          ],
+        ),
+        child: Center(
+          child: Text(
+            letter,
+            style: TextStyle(
+              fontSize: 36,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              shadows: [
+                Shadow(
+                  color: Colors.black45,
+                  blurRadius: 5,
+                  offset: Offset(2, 2),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
