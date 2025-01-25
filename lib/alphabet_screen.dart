@@ -57,20 +57,17 @@ class _AlphabetScreenState extends State<AlphabetScreen> {
 
   Future<void> _showWelcomeMessage() async {
     try {
-      // Speak the welcome message
-      await flutterTts.speak('Hello! Welcome to AlphaSpeak, your guided alphabet learning app!');
-      // Wait for TTS to finish before proceeding
+      await flutterTts.speak(
+          'Hello! Welcome to AlphaSpeak, your guided alphabet learning app!');
       await flutterTts.awaitSpeakCompletion(true);
     } catch (e) {
       print('Error during welcome message: $e');
     }
 
-    // Once the message is done, hide the welcome screen
     setState(() {
       _showWelcomeScreen = false;
     });
   }
-
 
   Future<void> _speakCurrentLetter() async {
     String letter = _examples.keys.elementAt(_currentIndex);
@@ -78,22 +75,22 @@ class _AlphabetScreenState extends State<AlphabetScreen> {
     String soundPath = 'alphabet-sounds/${letter.toLowerCase()}.mp3';
 
     try {
-      print('Speaking: $letter is for $word');
-      await flutterTts.speak('$letter is for $word');
+      // Stop any ongoing TTS and audio playback before proceeding
+      await flutterTts.stop();
+      await audioPlayer.stop();
+
+      // Speak the letter and word
+      print('Speaking: $letter is for $word, the sound is');
+      await flutterTts.speak('$letter is for $word, the sound is');
       await flutterTts.awaitSpeakCompletion(true);
 
-      print('TTS completed, now playing sound: $soundPath');
-      await audioPlayer.stop(); // Stop current playback if any
-      await audioPlayer.play(AssetSource(soundPath)); // Play the file
-      print('Sound playing: $soundPath');
+      // Play the sound immediately after speaking
+      print('Playing sound: $soundPath');
+      await audioPlayer.play(AssetSource(soundPath)); // Play the MP3 file
     } catch (e) {
-      print('Error playing sound or TTS for $letter: $e');
+      print('Error during TTS or audio playback for $letter: $e');
     }
   }
-
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -119,7 +116,6 @@ class _AlphabetScreenState extends State<AlphabetScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Welcome Message
           Text(
             'Hello! Welcome to AlphaSpeak, your guided alphabet learning app!',
             style: TextStyle(
@@ -137,7 +133,6 @@ class _AlphabetScreenState extends State<AlphabetScreen> {
             textAlign: TextAlign.center,
           ),
           SizedBox(height: 20),
-          // Loading Indicator
           CircularProgressIndicator(
             valueColor: AlwaysStoppedAnimation<Color>(Colors.pinkAccent),
           ),
@@ -150,7 +145,6 @@ class _AlphabetScreenState extends State<AlphabetScreen> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        // Center Image and Letter
         Expanded(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -174,13 +168,13 @@ class _AlphabetScreenState extends State<AlphabetScreen> {
               Expanded(
                 child: GestureDetector(
                   onTap: () {
-                    _speakCurrentLetter(); // Play sound and TTS on tap
+                    _speakCurrentLetter();
                   },
                   child: Container(
                     width: double.infinity,
                     child: Image.asset(
                       'assets/alphabets/${_examples.keys.elementAt(_currentIndex).toLowerCase()}.png',
-                      fit: BoxFit.contain, // Keeps original aspect ratio
+                      fit: BoxFit.contain,
                       errorBuilder: (context, error, stackTrace) {
                         return Icon(
                           Icons.image_not_supported,
@@ -211,11 +205,9 @@ class _AlphabetScreenState extends State<AlphabetScreen> {
             ],
           ),
         ),
-
-        // Bottom Carousel
         Container(
           padding: EdgeInsets.symmetric(vertical: 10),
-          color: Colors.black.withOpacity(0.6), // Semi-transparent overlay
+          color: Colors.black.withOpacity(0.6),
           child: SizedBox(
             height: 100,
             child: ListView.builder(
@@ -224,11 +216,11 @@ class _AlphabetScreenState extends State<AlphabetScreen> {
               itemBuilder: (context, index) {
                 String letter = _examples.keys.elementAt(index);
                 return GestureDetector(
-                  onTap: () {
+                  onTap: () async {
                     setState(() {
                       _currentIndex = index;
                     });
-                    _speakCurrentLetter();
+                    await _speakCurrentLetter();
                   },
                   child: AnimatedContainer(
                     duration: Duration(milliseconds: 300),
