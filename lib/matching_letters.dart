@@ -105,8 +105,12 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Matching Letters'),
-        backgroundColor: Colors.pinkAccent,
+        title: Text(
+          'Learn Alphabets',
+          style: TextStyle(color: Colors.white), // Set the title text color to white
+        ),
+        iconTheme: IconThemeData(color: Colors.white), // Set the back button color to white
+        backgroundColor: Colors.pinkAccent, // Keep the pink background
       ),
       body: Container(
         decoration: BoxDecoration(
