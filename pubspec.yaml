@@ -52,7 +52,7 @@ flutter:
     - assets/alphabets/z.png
     - assets/home-screen/abc.png
     - assets/home-screen/voice.png
-
+    - assets/alphabet-sounds/
 dependency_overrides:
   speech_to_text:
     git:
