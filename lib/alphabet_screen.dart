@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:audioplayers/audioplayers.dart'; // Import audioplayers package
+import 'package:audioplayers/audioplayers.dart';
 
 class AlphabetScreen extends StatefulWidget {
   @override
@@ -10,6 +10,8 @@ class AlphabetScreen extends StatefulWidget {
 class _AlphabetScreenState extends State<AlphabetScreen> {
   final FlutterTts flutterTts = FlutterTts();
   final AudioPlayer audioPlayer = AudioPlayer(); // AudioPlayer instance
+  final ScrollController _scrollController = ScrollController(); // ScrollController for the carousel
+
   int _currentIndex = 0;
   bool _showWelcomeScreen = true;
 
@@ -90,6 +92,21 @@ class _AlphabetScreenState extends State<AlphabetScreen> {
     } catch (e) {
       print('Error during TTS or audio playback for $letter: $e');
     }
+  }
+
+  Future<void> _scrollToCurrentIndex() async {
+    double itemWidth = 80.0; // Width of each letter in the carousel
+    double screenWidth = MediaQuery.of(context).size.width;
+
+    // Calculate the scroll offset to center the current letter
+    double centerOffset = (_currentIndex * itemWidth) - (screenWidth / 2) + (itemWidth / 2);
+
+    // Smooth scroll to make the current index centered
+    _scrollController.animateTo(
+      centerOffset.clamp(0, _scrollController.position.maxScrollExtent), // Clamp to valid range
+      duration: Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
   }
 
   @override
@@ -211,6 +228,7 @@ class _AlphabetScreenState extends State<AlphabetScreen> {
           child: SizedBox(
             height: 100,
             child: ListView.builder(
+              controller: _scrollController,
               scrollDirection: Axis.horizontal,
               itemCount: _examples.keys.length,
               itemBuilder: (context, index) {
@@ -221,6 +239,7 @@ class _AlphabetScreenState extends State<AlphabetScreen> {
                       _currentIndex = index;
                     });
                     await _speakCurrentLetter();
+                    await _scrollToCurrentIndex(); // Center the selected letter
                   },
                   child: AnimatedContainer(
                     duration: Duration(milliseconds: 300),
