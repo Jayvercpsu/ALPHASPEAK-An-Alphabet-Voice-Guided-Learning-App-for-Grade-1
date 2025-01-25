@@ -48,7 +48,7 @@ class _AlphabetScreenState extends State<AlphabetScreen> {
   void initState() {
     super.initState();
     _setupTTS();
-    _showWelcomeMessage();
+    _showLoadingScreen();
   }
 
   Future<void> _setupTTS() async {
@@ -57,15 +57,9 @@ class _AlphabetScreenState extends State<AlphabetScreen> {
     await flutterTts.setLanguage('en-US'); // English language
   }
 
-  Future<void> _showWelcomeMessage() async {
-    try {
-      await flutterTts.speak(
-          'Hello! Welcome to AlphaSpeak, your guided alphabet learning app!');
-      await flutterTts.awaitSpeakCompletion(true);
-    } catch (e) {
-      print('Error during welcome message: $e');
-    }
-
+  Future<void> _showLoadingScreen() async {
+    // Simulate a 0.5-second loading period
+    await Future.delayed(Duration(milliseconds: 500));
     setState(() {
       _showWelcomeScreen = false;
     });
@@ -123,18 +117,22 @@ class _AlphabetScreenState extends State<AlphabetScreen> {
             fit: BoxFit.cover,
           ),
         ),
-        child: _showWelcomeScreen ? _buildWelcomeScreen() : _buildMainScreen(),
+        child: _showWelcomeScreen ? _buildLoadingScreen() : _buildMainScreen(),
       ),
     );
   }
 
-  Widget _buildWelcomeScreen() {
+  Widget _buildLoadingScreen() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.pinkAccent),
+          ),
+          SizedBox(height: 20),
           Text(
-            'Hello! Welcome to AlphaSpeak, your guided alphabet learning app!',
+            'Loading...',
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -147,11 +145,6 @@ class _AlphabetScreenState extends State<AlphabetScreen> {
                 ),
               ],
             ),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: 20),
-          CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.pinkAccent),
           ),
         ],
       ),
@@ -166,22 +159,7 @@ class _AlphabetScreenState extends State<AlphabetScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                _examples.keys.elementAt(_currentIndex),
-                style: TextStyle(
-                  fontSize: 120,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  shadows: [
-                    Shadow(
-                      color: Colors.black45,
-                      blurRadius: 10,
-                      offset: Offset(2, 2),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 20),
+              // Removed the letter above the image
               Expanded(
                 child: GestureDetector(
                   onTap: () {

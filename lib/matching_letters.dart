@@ -18,12 +18,22 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen>
   List<String> _squareLetters = [];
   Map<String, bool?> _letterStates = {};
   bool _isAnimating = false;
+  bool _isLoading = true; // Show loading screen initially
 
   @override
   void initState() {
     super.initState();
+    _startLoading();
+  }
+
+  /// Start a 0.5-second loading screen
+  Future<void> _startLoading() async {
+    await Future.delayed(Duration(milliseconds: 500));
     _randomizeLetters();
     _speakTargetLetter();
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   /// Randomize letters in the grid
@@ -105,50 +115,85 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen>
             fit: BoxFit.cover,
           ),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Center the Grid
-            Expanded(
-              child: Center(
-                child: GridView.builder(
-                  shrinkWrap: true, // Center the grid in available space
-                  padding: EdgeInsets.all(16.0),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 16,
-                    crossAxisSpacing: 16,
-                    childAspectRatio: 1.0,
-                  ),
-                  itemCount: _squareLetters.length,
-                  itemBuilder: (context, index) {
-                    return _buildSquareButton(_squareLetters[index]);
-                  },
-                ),
-              ),
-            ),
-            // "Select the letter" Text Below Grid
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                'Select: $_targetLetter',
-                style: TextStyle(
-                  fontSize: 48,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  shadows: [
-                    Shadow(
-                      color: Colors.black45,
-                      blurRadius: 10,
-                      offset: Offset(2, 2),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
+        child: _isLoading ? _buildLoadingScreen() : _buildGameScreen(),
       ),
+    );
+  }
+
+  /// Build the loading screen
+  Widget _buildLoadingScreen() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.pinkAccent),
+          ),
+          SizedBox(height: 20),
+          Text(
+            'Loading...',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              shadows: [
+                Shadow(
+                  color: Colors.black45,
+                  blurRadius: 10,
+                  offset: Offset(2, 2),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Build the main game screen
+  Widget _buildGameScreen() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        // Center the Grid
+        Expanded(
+          child: Center(
+            child: GridView.builder(
+              shrinkWrap: true, // Center the grid in available space
+              padding: EdgeInsets.all(16.0),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisSpacing: 16,
+                crossAxisSpacing: 16,
+                childAspectRatio: 1.0,
+              ),
+              itemCount: _squareLetters.length,
+              itemBuilder: (context, index) {
+                return _buildSquareButton(_squareLetters[index]);
+              },
+            ),
+          ),
+        ),
+        // "Select the letter" Text Below Grid
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Text(
+            'Select: $_targetLetter',
+            style: TextStyle(
+              fontSize: 48,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              shadows: [
+                Shadow(
+                  color: Colors.black45,
+                  blurRadius: 10,
+                  offset: Offset(2, 2),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 
