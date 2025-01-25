@@ -46,8 +46,6 @@ class _CheckPronunciationScreenState extends State<CheckPronunciationScreen>
     _micAnimation = Tween<double>(begin: 1.0, end: 1.5).animate(_micController!);
 
     _showLoadingScreen();
-
-    _requestPermissions();
   }
 
   @override
@@ -61,14 +59,15 @@ class _CheckPronunciationScreenState extends State<CheckPronunciationScreen>
     setState(() {
       _isLoading = false;
     });
+    await _requestPermissions(); // Start the flow after loading screen
+    _selectRandomWord(); // Select the first random word
+    _speakWord(); // Speak the first word
   }
 
   Future<void> _requestPermissions() async {
     var status = await Permission.microphone.request();
     if (status.isGranted) {
       await _initializeSpeechRecognition();
-      _selectRandomWord();
-      _speakWord();
     } else {
       _showErrorDialog(
           'Microphone permission is required. Please enable it in settings.');
