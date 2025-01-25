@@ -6,6 +6,12 @@ import 'check_pronunciation.dart'; // Import the CheckPronunciationScreen
 class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    // Calculate button size to fit two per row
+    final buttonWidth = (screenWidth - 60) / 2; // Subtract padding and spacing
+    final buttonHeight = buttonWidth * 1.3; // Adjust height proportionally
+
     return Scaffold(
       body: Stack(
         children: [
@@ -63,28 +69,33 @@ class HomeScreen extends StatelessWidget {
                     children: [
                       // First Row: Learn Alphabet and Matching Letters
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           _buildFeatureButton(
                             context,
                             text: "Learn Alphabet",
                             imagePath: 'assets/home-screen/abc.png',
+                            width: buttonWidth,
+                            height: buttonHeight,
                             onPressed: () {
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (context) => AlphabetScreen()),
+                                MaterialPageRoute(
+                                    builder: (context) => AlphabetScreen()),
                               );
                             },
                           ),
-                          SizedBox(width: 20),
                           _buildFeatureButton(
                             context,
                             text: "Matching Letters",
                             imagePath: 'assets/home-screen/matching.png',
+                            width: buttonWidth,
+                            height: buttonHeight,
                             onPressed: () {
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (context) => MatchingLettersScreen()),
+                                MaterialPageRoute(
+                                    builder: (context) => MatchingLettersScreen()),
                               );
                             },
                           ),
@@ -93,16 +104,24 @@ class HomeScreen extends StatelessWidget {
                       SizedBox(height: 20),
 
                       // Second Row: Pronunciation Checker
-                      _buildFeatureButton(
-                        context,
-                        text: "Check Pronunciation",
-                        imagePath: 'assets/home-screen/voice.png',
-                        onPressed: () {
-                          Navigator.push(
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          _buildFeatureButton(
                             context,
-                            MaterialPageRoute(builder: (context) => CheckPronunciationScreen()),
-                          );
-                        },
+                            text: "Check Pronunciation",
+                            imagePath: 'assets/home-screen/voice.png',
+                            width: buttonWidth,
+                            height: buttonHeight,
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => CheckPronunciationScreen()),
+                              );
+                            },
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -118,12 +137,16 @@ class HomeScreen extends StatelessWidget {
 
   // Helper Method to Build Buttons with Images
   Widget _buildFeatureButton(BuildContext context,
-      {required String text, required String imagePath, required VoidCallback onPressed}) {
+      {required String text,
+        required String imagePath,
+        required double width,
+        required double height,
+        required VoidCallback onPressed}) {
     return GestureDetector(
       onTap: onPressed,
       child: Container(
-        width: 160,
-        height: 220,
+        width: width,
+        height: height,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
@@ -140,8 +163,8 @@ class HomeScreen extends StatelessWidget {
           children: [
             // Button Image
             Container(
-              height: 100,
-              width: 100,
+              height: height * 0.5,
+              width: height * 0.5,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 image: DecorationImage(
