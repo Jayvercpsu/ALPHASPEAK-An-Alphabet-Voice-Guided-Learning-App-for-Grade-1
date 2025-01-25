@@ -7,9 +7,9 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
-        android:label="alphabet_voice"
+        android:label="Learn Alphabet"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@drawable/alphabet">
 
         <activity
             android:name=".MainActivity"
