@@ -1,34 +1,26 @@
 name: alphabet_voice
-description: "A new Flutter project."
-
 
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.6.0
+  sdk: ">=2.19.0 <3.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  flutter_tts: ^3.6.3 # Use the latest version available
-  speech_to_text: ^5.5.3 # Use the latest version available
-  audioplayers: ^3.0.1
-
-
-
-  cupertino_icons: ^1.0.8
+  flutter_tts: ^3.6.3
+  speech_to_text: ^5.5.3
+  audioplayers: ^6.1.0 # Stable version of audioplayers
+  cupertino_icons: ^1.0.2 # Default icons for iOS
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
-
   flutter_lints: ^5.0.0
 
 flutter:
   uses-material-design: true
   assets:
-    - assets/
     - assets/background1.jpg
     - assets/alphabet.png
     - assets/backgroundimage.jpg
@@ -60,9 +52,6 @@ flutter:
     - assets/alphabets/z.png
     - assets/home-screen/abc.png
     - assets/home-screen/voice.png
-    - assets/alphabet-sounds/
-
-
 
 dependency_overrides:
   speech_to_text:

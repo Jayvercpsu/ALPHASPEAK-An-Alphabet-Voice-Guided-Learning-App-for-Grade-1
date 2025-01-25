@@ -1,14 +1,20 @@
 plugins {
-    id "com.android.application"
-    id "kotlin-android"
-    // Flutter Gradle Plugin
-    id "dev.flutter.flutter-gradle-plugin"
+    id 'com.android.application'
+    id 'kotlin-android'
+    id 'dev.flutter.flutter-gradle-plugin'
 }
 
 android {
-    namespace = "com.example.alphabet_voice" // Replace with your app's package name
-    compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    namespace = 'com.example.alphabet_voice' // Use your actual package name
+    compileSdk = 34
+
+    defaultConfig {
+        applicationId = 'com.example.alphabet_voice' // Use your actual package name
+        minSdk = 21
+        targetSdk = 33
+        versionCode = 1
+        versionName = '1.0'
+    }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -16,30 +22,8 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = '1.8'
     }
-
-    defaultConfig {
-        applicationId = "com.example.alphabet_voice" // Replace with your app's package name
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
-        versionCode = flutter.versionCode
-        versionName = flutter.versionName
-    }
-
-    buildTypes {
-        release {
-            // Enable ProGuard for release builds
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            // Signing config for release builds
-            signingConfig = signingConfigs.debug
-        }
-    }
-}
-
-flutter {
-    source = "../.." // Path to the Flutter module source
 }
 
 dependencies {
