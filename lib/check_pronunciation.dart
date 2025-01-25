@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -24,10 +25,12 @@ class _CheckPronunciationScreenState extends State<CheckPronunciationScreen>
   bool _isSpeaking = false;
   bool _isDetectingSpeech = false;
 
+  bool _isLoading = true; // To show the loading screen for 1 second
+
   final List<String> _basicWords = [
     'apple', 'banana', 'cat', 'dog', 'egg', 'fish', 'goat', 'house', 'ice',
     'jam', 'kite', 'lamp', 'mouse', 'nest', 'orange', 'pen', 'queen', 'rabbit',
-    'sun', 'three', 'umbrella', 'van', 'water', 'xray', 'yellow', 'zebra'
+    'sun', 'tree', 'umbrella', 'van', 'water', 'xray', 'yellow', 'zebra'
   ];
 
   AnimationController? _micController;
@@ -42,6 +45,8 @@ class _CheckPronunciationScreenState extends State<CheckPronunciationScreen>
     )..repeat(reverse: true);
     _micAnimation = Tween<double>(begin: 1.0, end: 1.5).animate(_micController!);
 
+    _showLoadingScreen();
+
     _requestPermissions();
   }
 
@@ -49,6 +54,13 @@ class _CheckPronunciationScreenState extends State<CheckPronunciationScreen>
   void dispose() {
     _micController?.dispose();
     super.dispose();
+  }
+
+  Future<void> _showLoadingScreen() async {
+    await Future.delayed(const Duration(seconds: 1));
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   Future<void> _requestPermissions() async {
@@ -211,77 +223,153 @@ class _CheckPronunciationScreenState extends State<CheckPronunciationScreen>
     );
   }
 
+  Widget _buildLoadingScreen() {
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: Image.asset(
+            'assets/background1.jpg',
+            fit: BoxFit.cover,
+          ),
+        ),
+        Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.pinkAccent),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'Loading...',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black45,
+                      blurRadius: 10,
+                      offset: Offset(2, 2),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(body: _buildLoadingScreen());
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Check Pronunciation'),
-        backgroundColor: Colors.pinkAccent,
+        title: Text(
+          'Check Pronunciation',
+          style: TextStyle(color: Colors.white), // Set the title text color to white
+        ),
+        iconTheme: IconThemeData(color: Colors.white), // Set the back button color to white
+        backgroundColor: Colors.pinkAccent, // Keep the pink background
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (!_isSpeaking) ...[
-              const Text(
-                'Say the word:',
-                style: TextStyle(fontSize: 34, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                _targetWord.toUpperCase(),
-                style: const TextStyle(fontSize: 60, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 20),
-            ],
-            if (_isListening)
-              Column(
-                children: [
-                  ScaleTransition(
-                    scale: _isDetectingSpeech ? _micAnimation! : AlwaysStoppedAnimation(1.0),
-                    child: Icon(Icons.mic, size: 100, color: Colors.redAccent),
-                  ),
-                  const Text(
-                    'Listening...',
-                    style: TextStyle(fontSize: 28, fontStyle: FontStyle.italic),
-                  ),
-                ],
-              ),
-            if (_spokenWord.isNotEmpty)
-              Text(
-                'You said: "${_spokenWord.toUpperCase()}"',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: _spokenWord.toLowerCase() == _targetWord.toLowerCase()
-                      ? Colors.green
-                      : Colors.red,
-                ),
-              ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset(
+              'assets/background1.jpg',
+              fit: BoxFit.cover,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                ElevatedButton(
-                  onPressed: _goBackToPreviousWord,
-                  child: const Text('Back Word'),
+                if (!_isSpeaking) ...[
+                  const Text(
+                    'Say the word:',
+                    style: TextStyle(
+                      fontSize: 34,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    _targetWord.toUpperCase(),
+                    style: const TextStyle(
+                      fontSize: 60,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                ],
+                if (_isListening)
+                  Column(
+                    children: [
+                      ScaleTransition(
+                        scale: _isDetectingSpeech
+                            ? _micAnimation!
+                            : AlwaysStoppedAnimation(1.0),
+                        child: const Icon(
+                          Icons.mic,
+                          size: 100,
+                          color: Colors.redAccent,
+                        ),
+                      ),
+                      const Text(
+                        'Listening...',
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontStyle: FontStyle.italic,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                if (_spokenWord.isNotEmpty)
+                  Text(
+                    'You said: "${_spokenWord.toUpperCase()}"',
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: _spokenWord.toLowerCase() == _targetWord.toLowerCase()
+                          ? Colors.green
+                          : Colors.red,
+                    ),
+                  ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton(
+                      onPressed: _goBackToPreviousWord,
+                      child: const Text('Back Word'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        _selectRandomWord();
+                        _speakWord();
+                      },
+                      child: const Text('Next Word'),
+                    ),
+                  ],
                 ),
+                const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: _speakWord,
                   child: const Text('Play Again'),
                 ),
-                ElevatedButton(
-                  onPressed: () {
-                    _selectRandomWord();
-                    _speakWord();
-                  },
-                  child: const Text('Next Word'),
-                ),
               ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
