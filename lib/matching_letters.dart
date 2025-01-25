@@ -28,7 +28,7 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen>
 
   /// Start a 0.5-second loading screen
   Future<void> _startLoading() async {
-    await Future.delayed(Duration(milliseconds: 500));
+    await Future.delayed(Duration(milliseconds: 1000));
     _randomizeLetters();
     _speakTargetLetter();
     setState(() {

@@ -9,8 +9,8 @@ class AlphabetScreen extends StatefulWidget {
 
 class _AlphabetScreenState extends State<AlphabetScreen> {
   final FlutterTts flutterTts = FlutterTts();
-  final AudioPlayer audioPlayer = AudioPlayer(); // AudioPlayer instance
-  final ScrollController _scrollController = ScrollController(); // ScrollController for the carousel
+  final AudioPlayer audioPlayer = AudioPlayer();
+  final ScrollController _scrollController = ScrollController();
 
   int _currentIndex = 0;
   bool _showWelcomeScreen = true;
@@ -52,14 +52,14 @@ class _AlphabetScreenState extends State<AlphabetScreen> {
   }
 
   Future<void> _setupTTS() async {
-    await flutterTts.setSpeechRate(0.5); // Slower speech for clarity
-    await flutterTts.setPitch(1.0); // Natural pitch
-    await flutterTts.setLanguage('en-US'); // English language
+    await flutterTts.setSpeechRate(0.5);
+    await flutterTts.setPitch(1.0);
+    await flutterTts.setLanguage('en-US');
   }
 
   Future<void> _showLoadingScreen() async {
-    // Simulate a 0.5-second loading period
-    await Future.delayed(Duration(milliseconds: 500));
+    // Simulate a 1-second loading period
+    await Future.delayed(Duration(seconds: 1));
     setState(() {
       _showWelcomeScreen = false;
     });
@@ -82,25 +82,32 @@ class _AlphabetScreenState extends State<AlphabetScreen> {
 
       // Play the sound immediately after speaking
       print('Playing sound: $soundPath');
-      await audioPlayer.play(AssetSource(soundPath)); // Play the MP3 file
+      await audioPlayer.play(AssetSource(soundPath));
     } catch (e) {
       print('Error during TTS or audio playback for $letter: $e');
     }
   }
 
   Future<void> _scrollToCurrentIndex() async {
-    double itemWidth = 80.0; // Width of each letter in the carousel
+    double itemWidth = 80.0;
     double screenWidth = MediaQuery.of(context).size.width;
 
-    // Calculate the scroll offset to center the current letter
     double centerOffset = (_currentIndex * itemWidth) - (screenWidth / 2) + (itemWidth / 2);
 
-    // Smooth scroll to make the current index centered
     _scrollController.animateTo(
-      centerOffset.clamp(0, _scrollController.position.maxScrollExtent), // Clamp to valid range
+      centerOffset.clamp(0, _scrollController.position.maxScrollExtent),
       duration: Duration(milliseconds: 300),
       curve: Curves.easeInOut,
     );
+  }
+
+  @override
+  void dispose() {
+    // Stop any ongoing TTS and audio playback when leaving the screen
+    flutterTts.stop();
+    audioPlayer.stop();
+    _scrollController.dispose(); // Dispose of the ScrollController
+    super.dispose();
   }
 
   @override
@@ -159,7 +166,6 @@ class _AlphabetScreenState extends State<AlphabetScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Removed the letter above the image
               Expanded(
                 child: GestureDetector(
                   onTap: () {
@@ -217,7 +223,7 @@ class _AlphabetScreenState extends State<AlphabetScreen> {
                       _currentIndex = index;
                     });
                     await _speakCurrentLetter();
-                    await _scrollToCurrentIndex(); // Center the selected letter
+                    await _scrollToCurrentIndex();
                   },
                   child: AnimatedContainer(
                     duration: Duration(milliseconds: 300),
