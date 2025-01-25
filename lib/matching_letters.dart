@@ -106,7 +106,7 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen>
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Learn Alphabets',
+          'Matching Letters',
           style: TextStyle(color: Colors.white), // Set the title text color to white
         ),
         iconTheme: IconThemeData(color: Colors.white), // Set the back button color to white
