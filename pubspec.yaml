@@ -9,9 +9,11 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_tts: ^3.6.3
-  speech_to_text: ^5.5.3
+  speech_to_text: ^6.6.1
   audioplayers: ^6.1.0 # Stable version of audioplayers
   cupertino_icons: ^1.0.2 # Default icons for iOS
+  voice_assistant: ^1.0.1
+  permission_handler: ^11.1.0
 
 dev_dependencies:
   flutter_test:

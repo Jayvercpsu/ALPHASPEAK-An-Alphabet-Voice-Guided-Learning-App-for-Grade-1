@@ -1,0 +1,288 @@
+import 'dart:math';
+import 'package:flutter/material.dart';
+import 'package:flutter_tts/flutter_tts.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:permission_handler/permission_handler.dart';
+
+class CheckPronunciationScreen extends StatefulWidget {
+  const CheckPronunciationScreen({Key? key}) : super(key: key);
+
+  @override
+  _CheckPronunciationScreenState createState() =>
+      _CheckPronunciationScreenState();
+}
+
+class _CheckPronunciationScreenState extends State<CheckPronunciationScreen>
+    with SingleTickerProviderStateMixin {
+  final FlutterTts _flutterTts = FlutterTts();
+  final stt.SpeechToText _speechToText = stt.SpeechToText();
+  bool _isListening = false;
+  bool _speechEnabled = false;
+  String _spokenWord = '';
+  String _targetWord = '';
+  String? _previousWord; // To store the previous word for "Back Word"
+  bool _isSpeaking = false;
+  bool _isDetectingSpeech = false;
+
+  final List<String> _basicWords = [
+    'apple', 'banana', 'cat', 'dog', 'egg', 'fish', 'goat', 'house', 'ice',
+    'jam', 'kite', 'lamp', 'mouse', 'nest', 'orange', 'pen', 'queen', 'rabbit',
+    'sun', 'three', 'umbrella', 'van', 'water', 'xray', 'yellow', 'zebra'
+  ];
+
+  AnimationController? _micController;
+  Animation<double>? _micAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _micController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    )..repeat(reverse: true);
+    _micAnimation = Tween<double>(begin: 1.0, end: 1.5).animate(_micController!);
+
+    _requestPermissions();
+  }
+
+  @override
+  void dispose() {
+    _micController?.dispose();
+    super.dispose();
+  }
+
+  Future<void> _requestPermissions() async {
+    var status = await Permission.microphone.request();
+    if (status.isGranted) {
+      await _initializeSpeechRecognition();
+      _selectRandomWord();
+      _speakWord();
+    } else {
+      _showErrorDialog(
+          'Microphone permission is required. Please enable it in settings.');
+    }
+  }
+
+  Future<void> _initializeSpeechRecognition() async {
+    bool isInitialized = await _speechToText.initialize(
+      onStatus: (status) => print('Speech status: $status'),
+      onError: (error) => print('Speech recognition error: ${error.errorMsg}'),
+    );
+
+    if (!isInitialized) {
+      _showErrorDialog('Speech recognition is not available on this device.');
+    }
+
+    setState(() {
+      _speechEnabled = isInitialized;
+    });
+  }
+
+  void _selectRandomWord() {
+    _previousWord = _targetWord; // Save the current word as the previous word
+    final randomIndex = Random().nextInt(_basicWords.length);
+    setState(() {
+      _targetWord = _basicWords[randomIndex];
+    });
+  }
+
+  Future<void> _speakWord() async {
+    setState(() {
+      _isSpeaking = true;
+      _spokenWord = ''; // Reset spoken word
+    });
+
+    // Disable listening while TTS is speaking
+    await _speechToText.stop();
+
+    await _flutterTts.setLanguage('en-US');
+    await _flutterTts.setSpeechRate(0.5);
+    await _flutterTts.setPitch(1.0);
+    await _flutterTts.speak('Say the word $_targetWord, now, your turn!');
+    _flutterTts.setCompletionHandler(() {
+      setState(() => _isSpeaking = false);
+      _startListening(); // Start listening after TTS completes
+    });
+  }
+
+  void _startListening() async {
+    if (!_speechEnabled || _isSpeaking) return;
+
+    setState(() {
+      _isListening = true;
+      _spokenWord = ''; // Clear any previous word
+    });
+
+    try {
+      await _speechToText.listen(
+        localeId: 'en_US',
+        onSoundLevelChange: (level) {
+          // Trigger mic animation only if sound level is above a threshold
+          setState(() {
+            _isDetectingSpeech = level > 0.5; // Adjust threshold as needed
+          });
+        },
+        onResult: (result) {
+          setState(() {
+            _spokenWord = result.recognizedWords.trim(); // Display immediately
+            _isListening = result.finalResult ? false : true;
+          });
+
+          if (result.finalResult) {
+            _checkPronunciation();
+          }
+        },
+      );
+    } catch (e) {
+      setState(() {
+        _isListening = false;
+      });
+      _showErrorDialog('Speech recognition failed: $e');
+    }
+  }
+
+  void _checkPronunciation() async {
+    if (_spokenWord.toLowerCase() == _targetWord.toLowerCase()) {
+      setState(() {
+        _isListening = false; // Stop listening immediately
+      });
+
+      // Speak "Correct!" and update UI synchronously
+      await _flutterTts.speak('Correct!');
+      _showMessage('Correct! Well done!', Colors.green);
+
+      // Automatically move to the next word
+      Future.delayed(const Duration(milliseconds: 500), () {
+        _selectRandomWord();
+        _speakWord();
+      });
+    } else {
+      setState(() {
+        _isListening = false; // Stop listening immediately
+      });
+
+      // Speak "Incorrect!" and update UI synchronously
+      await _flutterTts.speak('Incorrect! Try again.');
+      _showMessage('Incorrect! Try again.', Colors.red);
+
+      // Restart listening for the same word
+      _startListening();
+    }
+  }
+
+  void _goBackToPreviousWord() {
+    if (_previousWord != null) {
+      setState(() {
+        _targetWord = _previousWord!;
+        _spokenWord = ''; // Reset spoken word
+      });
+      _speakWord();
+    } else {
+      _showMessage('No previous word available!', Colors.orange);
+    }
+  }
+
+  void _showMessage(String message, Color color) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: color,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Error'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Check Pronunciation'),
+        backgroundColor: Colors.pinkAccent,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (!_isSpeaking) ...[
+              const Text(
+                'Say the word:',
+                style: TextStyle(fontSize: 34, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                _targetWord.toUpperCase(),
+                style: const TextStyle(fontSize: 60, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 20),
+            ],
+            if (_isListening)
+              Column(
+                children: [
+                  ScaleTransition(
+                    scale: _isDetectingSpeech ? _micAnimation! : AlwaysStoppedAnimation(1.0),
+                    child: Icon(Icons.mic, size: 100, color: Colors.redAccent),
+                  ),
+                  const Text(
+                    'Listening...',
+                    style: TextStyle(fontSize: 28, fontStyle: FontStyle.italic),
+                  ),
+                ],
+              ),
+            if (_spokenWord.isNotEmpty)
+              Text(
+                'You said: "${_spokenWord.toUpperCase()}"',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: _spokenWord.toLowerCase() == _targetWord.toLowerCase()
+                      ? Colors.green
+                      : Colors.red,
+                ),
+              ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: _goBackToPreviousWord,
+                  child: const Text('Back Word'),
+                ),
+                ElevatedButton(
+                  onPressed: _speakWord,
+                  child: const Text('Play Again'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    _selectRandomWord();
+                    _speakWord();
+                  },
+                  child: const Text('Next Word'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

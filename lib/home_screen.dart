@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'alphabet_screen.dart';
 import 'matching_letters.dart';
+import 'check_pronunciation.dart'; // Import the CheckPronunciationScreen
 
 class HomeScreen extends StatelessWidget {
   @override
@@ -97,7 +98,10 @@ class HomeScreen extends StatelessWidget {
                         text: "Check Pronunciation",
                         imagePath: 'assets/home-screen/voice.png',
                         onPressed: () {
+                          Navigator.push(
+                            context,
                             MaterialPageRoute(builder: (context) => CheckPronunciationScreen()),
+                          );
                         },
                       ),
                     ],
