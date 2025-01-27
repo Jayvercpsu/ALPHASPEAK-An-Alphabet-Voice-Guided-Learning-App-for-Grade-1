@@ -5,8 +5,8 @@ import 'package:audioplayers/audioplayers.dart';
 class AlphabetScreen extends StatefulWidget {
   final AudioPlayer audioPlayer;
 
-  AlphabetScreen({required this.audioPlayer}); // Added required parameter
-  
+  AlphabetScreen({required this.audioPlayer});
+
   @override
   _AlphabetScreenState createState() => _AlphabetScreenState();
 }
@@ -62,7 +62,6 @@ class _AlphabetScreenState extends State<AlphabetScreen> {
   }
 
   Future<void> _showLoadingScreen() async {
-    // Simulate a 1-second loading period
     await Future.delayed(Duration(seconds: 1));
     setState(() {
       _showWelcomeScreen = false;
@@ -75,16 +74,16 @@ class _AlphabetScreenState extends State<AlphabetScreen> {
     String soundPath = 'alphabet-sounds/${letter.toLowerCase()}.mp3';
 
     try {
-      // Stop any ongoing TTS and audio playback before proceeding
+      // Stop ongoing TTS and audio playback
       await flutterTts.stop();
       await audioPlayer.stop();
 
       // Speak the letter and word
-      print('Speaking: $letter is for $word, the sound is');
+      print('Speaking: $letter is for $word, the sound is...');
       await flutterTts.speak('$letter is for $word, the sound is');
       await flutterTts.awaitSpeakCompletion(true);
 
-      // Play the sound immediately after speaking
+      // After speaking, play the letter sound
       print('Playing sound: $soundPath');
       await audioPlayer.play(AssetSource(soundPath));
     } catch (e) {
@@ -96,7 +95,8 @@ class _AlphabetScreenState extends State<AlphabetScreen> {
     double itemWidth = 80.0;
     double screenWidth = MediaQuery.of(context).size.width;
 
-    double centerOffset = (_currentIndex * itemWidth) - (screenWidth / 2) + (itemWidth / 2);
+    double centerOffset =
+        (_currentIndex * itemWidth) - (screenWidth / 2) + (itemWidth / 2);
 
     _scrollController.animateTo(
       centerOffset.clamp(0, _scrollController.position.maxScrollExtent),
@@ -107,10 +107,9 @@ class _AlphabetScreenState extends State<AlphabetScreen> {
 
   @override
   void dispose() {
-    // Stop any ongoing TTS and audio playback when leaving the screen
     flutterTts.stop();
     audioPlayer.stop();
-    _scrollController.dispose(); // Dispose of the ScrollController
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -120,10 +119,10 @@ class _AlphabetScreenState extends State<AlphabetScreen> {
       appBar: AppBar(
         title: Text(
           'Learn Alphabets',
-          style: TextStyle(color: Colors.white), // Set the title text color to white
+          style: TextStyle(color: Colors.white),
         ),
-        iconTheme: IconThemeData(color: Colors.white), // Set the back button color to white
-        backgroundColor: Colors.pinkAccent, // Keep the pink background
+        iconTheme: IconThemeData(color: Colors.white),
+        backgroundColor: Colors.pinkAccent,
       ),
       body: Container(
         decoration: BoxDecoration(
