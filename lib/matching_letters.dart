@@ -2,19 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'dart:math';
+import 'score_history.dart';
 
 class MatchingLettersScreen extends StatefulWidget {
   final AudioPlayer audioPlayer;
 
   MatchingLettersScreen({required this.audioPlayer});
 
-  
   @override
   _MatchingLettersScreenState createState() => _MatchingLettersScreenState();
 }
 
-class _MatchingLettersScreenState extends State<MatchingLettersScreen>
-    with SingleTickerProviderStateMixin {
+class _MatchingLettersScreenState extends State<MatchingLettersScreen> {
   final FlutterTts flutterTts = FlutterTts();
   final Random _random = Random();
   final AudioPlayer _audioPlayer = AudioPlayer();
@@ -22,8 +21,9 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen>
   String _targetLetter = 'A';
   List<String> _squareLetters = [];
   Map<String, bool?> _letterStates = {};
+  int _score = 0; // Score tracker
   bool _isAnimating = false;
-  bool _isLoading = true; // Show loading screen initially
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -31,7 +31,6 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen>
     _startLoading();
   }
 
-  /// Start a 0.5-second loading screen
   Future<void> _startLoading() async {
     await Future.delayed(Duration(milliseconds: 1000));
     _randomizeLetters();
@@ -41,7 +40,6 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen>
     });
   }
 
-  /// Randomize letters in the grid
   void _randomizeLetters() {
     Set<String> lettersSet = {};
     while (lettersSet.length < 4) {
@@ -51,27 +49,24 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen>
     _squareLetters = lettersSet.toList();
     _targetLetter = _squareLetters[_random.nextInt(4)];
     _letterStates = {
-      for (var letter in _squareLetters) letter: null, // Reset states
+      for (var letter in _squareLetters) letter: null,
     };
     setState(() {});
   }
 
-  /// Speak the target letter
   Future<void> _speakTargetLetter() async {
     await flutterTts.speak('Select the letter $_targetLetter');
   }
 
-  /// Play audio for correct/wrong selection
   Future<void> _playAudio(String path) async {
     try {
-      await _audioPlayer.setSource(AssetSource(path)); // Set audio source
-      await _audioPlayer.resume(); // Play the audio
+      await _audioPlayer.setSource(AssetSource(path));
+      await _audioPlayer.resume();
     } catch (e) {
       print("Error playing audio: $e");
     }
   }
 
-  /// Handle user selection
   Future<void> _handleSelection(String selectedLetter) async {
     if (_isAnimating) return;
 
@@ -79,6 +74,7 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen>
       setState(() {
         _letterStates[selectedLetter] = true;
         _isAnimating = true;
+        _score++; // Increment the score for a correct answer
       });
       await _playAudio('alphabet-sounds/correct.mp3');
       await flutterTts.speak('Correct!');
@@ -112,10 +108,44 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen>
       appBar: AppBar(
         title: Text(
           'Matching Letters',
-          style: TextStyle(color: Colors.white), // Set the title text color to white
+          style: TextStyle(color: Colors.white),
         ),
-        iconTheme: IconThemeData(color: Colors.white), // Set the back button color to white
-        backgroundColor: Colors.pinkAccent, // Keep the pink background
+        actions: [
+          // Score button in the top-right corner
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ScoreHistoryScreen(
+                      initialScore: _score,
+                      resetScore: () {
+                        setState(() {
+                          _score = 0; // Reset the score to 0
+                        });
+                      },
+                    ),
+                  ),
+
+                );
+              },
+              child: Row(
+                children: [
+                  Icon(Icons.scoreboard, color: Colors.white),
+                  SizedBox(width: 4),
+                  Text(
+                    'Score: $_score',
+                    style: TextStyle(fontSize: 16, color: Colors.white),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+        iconTheme: IconThemeData(color: Colors.white),
+        backgroundColor: Colors.pinkAccent,
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -129,52 +159,66 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen>
     );
   }
 
-  /// Build the loading screen
   Widget _buildLoadingScreen() {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.pinkAccent),
-          ),
-          SizedBox(height: 20),
-          Text(
-            'Loading...',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              shadows: [
-                Shadow(
-                  color: Colors.black45,
-                  blurRadius: 10,
-                  offset: Offset(2, 2),
-                ),
-              ],
-            ),
-          ),
-        ],
+      child: CircularProgressIndicator(
+        valueColor: AlwaysStoppedAnimation<Color>(Colors.pinkAccent),
       ),
     );
   }
 
-  /// Build the main game screen
   Widget _buildGameScreen() {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.center, // Center everything vertically
+      crossAxisAlignment: CrossAxisAlignment.center, // Align items to the center horizontally
       children: [
-        // Center the Grid
-        Expanded(
+        // Target letter text with background
+        Padding(
+          padding: const EdgeInsets.only(top: 32.0, left: 16.0, right: 16.0), // Adjust top margin
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.pinkAccent, Colors.orangeAccent], // Gradient background
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(12), // Rounded corners
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black26, // Subtle shadow
+                  blurRadius: 8,
+                  offset: Offset(2, 4),
+                ),
+              ],
+            ),
+            padding: EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+            child: Text(
+              'Select: $_targetLetter',
+              style: TextStyle(
+                fontSize: 36,
+                fontWeight: FontWeight.bold,
+                color: Colors.white, // Text color
+                shadows: [
+                  Shadow(
+                    color: Colors.black45,
+                    blurRadius: 10,
+                    offset: Offset(2, 2),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+
+  Expanded(
           child: Center(
             child: GridView.builder(
-              shrinkWrap: true, // Center the grid in available space
+              shrinkWrap: true,
               padding: EdgeInsets.all(16.0),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 mainAxisSpacing: 16,
                 crossAxisSpacing: 16,
-                childAspectRatio: 1.0,
               ),
               itemCount: _squareLetters.length,
               itemBuilder: (context, index) {
@@ -183,30 +227,10 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen>
             ),
           ),
         ),
-        // "Select the letter" Text Below Grid
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Text(
-            'Select: $_targetLetter',
-            style: TextStyle(
-              fontSize: 48,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              shadows: [
-                Shadow(
-                  color: Colors.black45,
-                  blurRadius: 10,
-                  offset: Offset(2, 2),
-                ),
-              ],
-            ),
-          ),
-        ),
       ],
     );
   }
 
-  /// Square Button with animation and feedback
   Widget _buildSquareButton(String letter) {
     final state = _letterStates[letter];
     final color = state == null
@@ -221,7 +245,11 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen>
         duration: Duration(milliseconds: 300),
         curve: Curves.easeInOut,
         decoration: BoxDecoration(
-          color: color,
+          gradient: LinearGradient(
+            colors: [color.withOpacity(0.8), color],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
@@ -235,7 +263,7 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen>
           child: Text(
             letter,
             style: TextStyle(
-              fontSize: 36,
+              fontSize: 48,
               fontWeight: FontWeight.bold,
               color: Colors.white,
               shadows: [
