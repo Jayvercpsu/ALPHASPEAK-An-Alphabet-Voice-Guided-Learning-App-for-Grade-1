@@ -30,6 +30,8 @@ flutter:
   uses-material-design: true
   assets:
     - assets/background1.jpg
+    - assets/abc.gif
+    - assets/female_abcsong2.mp3
     - assets/alphabet.png
     - assets/backgroundimage.jpg
     - assets/alphabets/a.png
@@ -64,6 +66,7 @@ flutter:
     - assets/alphabet-sounds/
     - assets/alphabet-sounds/wrong.mp3
     - assets/alphabet-sounds/correct.mp3
+    - assets/alphabet-sounds/tap.mp3
     - assets/matching-letters/
 
 dependency_overrides:
