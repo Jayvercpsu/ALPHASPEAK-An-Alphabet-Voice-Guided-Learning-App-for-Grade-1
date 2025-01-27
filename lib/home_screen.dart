@@ -1,9 +1,47 @@
 import 'package:flutter/material.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'alphabet_screen.dart';
 import 'matching_letters.dart';
 import 'check_pronunciation.dart'; // Import the CheckPronunciationScreen
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
+  final AudioPlayer audioPlayer;
+
+  HomeScreen({required this.audioPlayer});
+
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final AudioPlayer _tapPlayer = AudioPlayer(); // For playing tap sound
+
+  @override
+  void initState() {
+    super.initState();
+    _resumeBackgroundMusic();
+  }
+
+  Future<void> _resumeBackgroundMusic() async {
+    await widget.audioPlayer.setReleaseMode(ReleaseMode.loop);
+    await widget.audioPlayer.resume();
+  }
+
+  Future<void> _stopBackgroundMusic() async {
+    await widget.audioPlayer.pause();
+  }
+
+  Future<void> _playTapSound() async {
+    // Play the tap sound
+    await _tapPlayer.play(AssetSource('alphabet-sounds/tap.mp3'), volume: 1.0);
+  }
+
+  @override
+  void dispose() {
+    _tapPlayer.dispose(); // Dispose the tap sound player
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -39,25 +77,31 @@ class HomeScreen extends StatelessWidget {
                 ),
                 SizedBox(height: 20),
 
-                // Title
+                // Title with white background color
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                  child: Text(
-                    "AlphaSpeak: Alphabet Learning App",
-                    style: TextStyle(
-                      fontSize: 26,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      fontFamily: 'Comic Sans MS',
-                      shadows: [
-                        Shadow(
-                          color: Colors.black54,
-                          blurRadius: 10,
-                          offset: Offset(2, 2),
-                        ),
-                      ],
+                  child: Container(
+                    padding: EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.8),
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    textAlign: TextAlign.center,
+                    child: Text(
+                      "AlphaSpeak: Alphabet Learning App",
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.purple,
+                        shadows: [
+                          Shadow(
+                            color: Colors.blueAccent,
+                            blurRadius: 5,
+                            offset: Offset(2, 2),
+                          ),
+                        ],
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 ),
                 SizedBox(height: 30),
@@ -77,12 +121,18 @@ class HomeScreen extends StatelessWidget {
                             imagePath: 'assets/home-screen/abc.png',
                             width: buttonWidth,
                             height: buttonHeight,
-                            onPressed: () {
-                              Navigator.push(
+                            onPressed: () async {
+                              await _playTapSound();
+                              await _stopBackgroundMusic();
+                              await Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => AlphabetScreen()),
+                                  builder: (context) => AlphabetScreen(
+                                    audioPlayer: widget.audioPlayer,
+                                  ),
+                                ),
                               );
+                              await _resumeBackgroundMusic();
                             },
                           ),
                           _buildFeatureButton(
@@ -91,12 +141,18 @@ class HomeScreen extends StatelessWidget {
                             imagePath: 'assets/home-screen/matching.png',
                             width: buttonWidth,
                             height: buttonHeight,
-                            onPressed: () {
-                              Navigator.push(
+                            onPressed: () async {
+                              await _playTapSound();
+                              await _stopBackgroundMusic();
+                              await Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => MatchingLettersScreen()),
+                                  builder: (context) => MatchingLettersScreen(
+                                    audioPlayer: widget.audioPlayer,
+                                  ),
+                                ),
                               );
+                              await _resumeBackgroundMusic();
                             },
                           ),
                         ],
@@ -113,12 +169,18 @@ class HomeScreen extends StatelessWidget {
                             imagePath: 'assets/home-screen/voice.png',
                             width: buttonWidth,
                             height: buttonHeight,
-                            onPressed: () {
-                              Navigator.push(
+                            onPressed: () async {
+                              await _playTapSound();
+                              await _stopBackgroundMusic();
+                              await Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => CheckPronunciationScreen()),
+                                  builder: (context) => CheckPronunciationScreen(
+                                    audioPlayer: widget.audioPlayer,
+                                  ),
+                                ),
                               );
+                              await _resumeBackgroundMusic();
                             },
                           ),
                         ],

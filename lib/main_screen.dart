@@ -8,7 +8,7 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
-  final AudioPlayer _audioPlayer = AudioPlayer();
+  final AudioPlayer _audioPlayer = AudioPlayer(); // Single instance for audio
   final AudioPlayer _tapPlayer = AudioPlayer(); // For tap sound
 
   late AnimationController _welcomeController;
@@ -114,10 +114,12 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     // Close the loading dialog
     Navigator.pop(context);
 
-    // Navigate to HomeScreen
+    // Navigate to HomeScreen with the _audioPlayer instance
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => HomeScreen()),
+      MaterialPageRoute(
+        builder: (context) => HomeScreen(audioPlayer: _audioPlayer),
+      ),
     );
   }
 

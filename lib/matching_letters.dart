@@ -4,6 +4,11 @@ import 'package:audioplayers/audioplayers.dart';
 import 'dart:math';
 
 class MatchingLettersScreen extends StatefulWidget {
+  final AudioPlayer audioPlayer;
+
+  MatchingLettersScreen({required this.audioPlayer});
+
+  
   @override
   _MatchingLettersScreenState createState() => _MatchingLettersScreenState();
 }

@@ -3,6 +3,10 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:audioplayers/audioplayers.dart';
 
 class AlphabetScreen extends StatefulWidget {
+  final AudioPlayer audioPlayer;
+
+  AlphabetScreen({required this.audioPlayer}); // Added required parameter
+  
   @override
   _AlphabetScreenState createState() => _AlphabetScreenState();
 }
