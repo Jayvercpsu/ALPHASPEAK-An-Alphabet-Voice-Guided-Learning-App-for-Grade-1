@@ -10,7 +10,7 @@ class CheckPronunciationScreen extends StatefulWidget {
 
   final AudioPlayer audioPlayer;
 
-  CheckPronunciationScreen({required this.audioPlayer}); // Added required parameter
+  CheckPronunciationScreen({required this.audioPlayer});
 
   @override
   _CheckPronunciationScreenState createState() =>

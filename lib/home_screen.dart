@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'alphabet_screen.dart';
 import 'matching_letters.dart';
-import 'check_pronunciation.dart'; // Import the CheckPronunciationScreen
+import 'check_pronunciation.dart';
+import 'word_puzzle.dart';
 
 class HomeScreen extends StatefulWidget {
   final AudioPlayer audioPlayer;
@@ -107,6 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 SizedBox(height: 30),
 
                 // Features Section
+                // Features Section
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20.0),
                   child: Column(
@@ -159,9 +161,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       SizedBox(height: 20),
 
-                      // Second Row: Pronunciation Checker
+                      // Second Row: Check Pronunciation and Word Puzzle
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           _buildFeatureButton(
                             context,
@@ -183,11 +185,32 @@ class _HomeScreenState extends State<HomeScreen> {
                               await _resumeBackgroundMusic();
                             },
                           ),
+                          _buildFeatureButton(
+                            context,
+                            text: "Word Puzzle",
+                            imagePath: 'assets/home-screen/puzzle.png',
+                            width: buttonWidth,
+                            height: buttonHeight,
+                            onPressed: () async {
+                              await _playTapSound();
+                              await _stopBackgroundMusic();
+                              await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => WordPuzzleScreen(
+                                    audioPlayer: widget.audioPlayer, // Pass the audioPlayer here
+                                  ),
+                                ),
+                              );
+                              await _resumeBackgroundMusic();
+                            },
+                          ),
                         ],
                       ),
                     ],
                   ),
                 ),
+
                 SizedBox(height: 40),
               ],
             ),

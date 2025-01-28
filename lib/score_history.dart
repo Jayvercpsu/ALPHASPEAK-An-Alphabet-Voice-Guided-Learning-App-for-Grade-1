@@ -92,10 +92,12 @@ class _ScoreHistoryScreenState extends State<ScoreHistoryScreen> {
       appBar: AppBar(
         title: Text(
           'Score History',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: TextStyle(color: Colors.white),// Set text color to white
         ),
-        backgroundColor: Colors.pinkAccent,
+        backgroundColor: Colors.pinkAccent, // Keep the background color as is
+        iconTheme: IconThemeData(color: Colors.white), // Set the arrow color to white
       ),
+
       body: Container(
         decoration: BoxDecoration(
           image: DecorationImage(

@@ -63,6 +63,8 @@ flutter:
     - assets/home-screen/abc.png
     - assets/home-screen/matching.png
     - assets/home-screen/voice.png
+    - assets/home-screen/puzzle.png
+    - assets/board.png
     - assets/alphabet-sounds/
     - assets/alphabet-sounds/wrong.mp3
     - assets/alphabet-sounds/correct.mp3
