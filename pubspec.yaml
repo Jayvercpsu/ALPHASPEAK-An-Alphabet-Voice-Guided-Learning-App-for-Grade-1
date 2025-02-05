@@ -14,6 +14,7 @@ dependencies:
   cupertino_icons: ^1.0.2 # Default icons for iOS
   voice_assistant: ^1.0.1
   permission_handler: ^11.1.0
+  google_fonts: ^6.2.1
 
 dev_dependencies:
   flutter_test:
@@ -31,8 +32,12 @@ flutter:
   assets:
     - assets/background1.jpg
     - assets/abc.gif
-    - assets/female_abcsong2.mp3
+    - assets/bg_music.mp3
     - assets/alphabet.png
+    - assets/word_puzzle/success.mp3
+    - assets/word_puzzle/drop.mp3
+    - assets/word_puzzle/correct.mp3
+    - assets/word_puzzle/drop.mp3
     - assets/backgroundimage.jpg
     - assets/alphabets/a.png
     - assets/alphabets/b.png
@@ -69,10 +74,5 @@ flutter:
     - assets/alphabet-sounds/wrong.mp3
     - assets/alphabet-sounds/correct.mp3
     - assets/alphabet-sounds/tap.mp3
-    - assets/matching-letters/
+    - assets/all-letters/
 
-dependency_overrides:
-  speech_to_text:
-    git:
-      url: https://github.com/csdcorp/speech_to_text.git
-      path: speech_to_text

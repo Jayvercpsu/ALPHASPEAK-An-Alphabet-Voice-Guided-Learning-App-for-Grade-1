@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
-import 'alphabet_screen.dart';
+import 'main_alphabet.dart';
 import 'matching_letters.dart';
 import 'check_pronunciation.dart';
 import 'word_puzzle.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class HomeScreen extends StatefulWidget {
   final AudioPlayer audioPlayer;
@@ -78,30 +79,66 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 SizedBox(height: 20),
 
-                // Title with white background color
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20.0),
                   child: Container(
-                    padding: EdgeInsets.all(10),
+                    padding: EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.8),
-                      borderRadius: BorderRadius.circular(10),
+                      color: Colors.white.withOpacity(0.9),
+                      // Slightly stronger opacity
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 10,
+                          spreadRadius: 2,
+                          offset: Offset(3, 3),
+                        ),
+                      ],
                     ),
-                    child: Text(
-                      "AlphaSpeak: Alphabet Learning App",
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.purple,
-                        shadows: [
-                          Shadow(
-                            color: Colors.blueAccent,
-                            blurRadius: 5,
-                            offset: Offset(2, 2),
-                          ),
+                    child: RichText(
+                      textAlign: TextAlign.center,
+                      text: TextSpan(
+                        children: [
+                          for (int i = 0;
+                              i < "AlphaSpeak: Alphabet Learning App".length;
+                              i++)
+                            TextSpan(
+                              text: "AlphaSpeak: Alphabet Learning App"[i],
+                              style: GoogleFonts.pacifico(
+                                fontSize: 30,
+                                // Slightly bigger for better visibility
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1.2,
+                                // Adds slight spacing for readability
+                                color: [
+                                  Colors.red,
+                                  Colors.orange,
+                                  Colors.yellow,
+                                  Colors.green,
+                                  Colors.blue,
+                                  Colors.indigo,
+                                  Colors.purple
+                                ][i % 7],
+                                // Cycle through rainbow colors
+                                shadows: [
+                                  Shadow(
+                                    color: Colors.black45,
+                                    // Darker shadow for contrast
+                                    blurRadius: 8,
+                                    offset: Offset(3, 3),
+                                  ),
+                                  Shadow(
+                                    color: Colors.white.withOpacity(0.6),
+                                    // Soft outer glow
+                                    blurRadius: 10,
+                                    offset: Offset(-2, -2),
+                                  ),
+                                ],
+                              ),
+                            ),
                         ],
                       ),
-                      textAlign: TextAlign.center,
                     ),
                   ),
                 ),
@@ -129,7 +166,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               await Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => AlphabetScreen(
+                                  builder: (context) => MainAlphabet(
                                     audioPlayer: widget.audioPlayer,
                                   ),
                                 ),
@@ -139,7 +176,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           _buildFeatureButton(
                             context,
-                            text: "Matching Letters",
+                            text: "Rhyming Words",
                             imagePath: 'assets/home-screen/matching.png',
                             width: buttonWidth,
                             height: buttonHeight,
@@ -177,7 +214,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               await Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => CheckPronunciationScreen(
+                                  builder: (context) =>
+                                      CheckPronunciationScreen(
                                     audioPlayer: widget.audioPlayer,
                                   ),
                                 ),
@@ -198,7 +236,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => WordPuzzleScreen(
-                                    audioPlayer: widget.audioPlayer, // Pass the audioPlayer here
+                                    audioPlayer: widget
+                                        .audioPlayer, // Pass the audioPlayer here
                                   ),
                                 ),
                               );
@@ -223,10 +262,10 @@ class _HomeScreenState extends State<HomeScreen> {
   // Helper Method to Build Buttons with Images
   Widget _buildFeatureButton(BuildContext context,
       {required String text,
-        required String imagePath,
-        required double width,
-        required double height,
-        required VoidCallback onPressed}) {
+      required String imagePath,
+      required double width,
+      required double height,
+      required VoidCallback onPressed}) {
     return GestureDetector(
       onTap: onPressed,
       child: Container(

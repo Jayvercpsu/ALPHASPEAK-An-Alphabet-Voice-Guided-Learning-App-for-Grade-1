@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'home_screen.dart'; // Import HomeScreen
+import 'package:google_fonts/google_fonts.dart';
 
 class MainScreen extends StatefulWidget {
   @override
@@ -75,7 +76,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   Future<void> _playBackgroundMusic() async {
     // Play background music in a loop
     await _audioPlayer.setReleaseMode(ReleaseMode.loop); // Loop mode
-    await _audioPlayer.play(AssetSource('female_abcsong2.mp3'), volume: 0.5);
+    await _audioPlayer.play(AssetSource('bg_music.mp3'), volume: 0.5);
   }
 
   Future<void> _playTapSound() async {
@@ -156,31 +157,59 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.8),
+                  color: Colors.white.withOpacity(0.9),
+                  // Increased opacity for better contrast
                   borderRadius: BorderRadius.circular(15),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 10,
+                      color: Colors.black26,
+                      // Darker shadow for a floating effect
+                      blurRadius: 12,
+                      spreadRadius: 2,
                       offset: Offset(3, 3),
                     ),
                   ],
                 ),
-                child: Text(
-                  'Welcome to AlphaSpeak!',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.purple,
-                    shadows: [
-                      Shadow(
-                        color: Colors.blueAccent,
-                        blurRadius: 5,
-                        offset: Offset(2, 2),
-                      ),
+                child: RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                    children: [
+                      for (int i = 0; i < "Welcome to AlphaSpeak!".length; i++)
+                        TextSpan(
+                          text: "Welcome to AlphaSpeak!"[i],
+                          style: GoogleFonts.pacifico(
+                            fontSize: 30,
+                            // Slightly larger for better visibility
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.2,
+                            color: [
+                              Colors.red,
+                              Colors.orange,
+                              Colors.yellow,
+                              Colors.green,
+                              Colors.blue,
+                              Colors.indigo,
+                              Colors.purple
+                            ][i % 7],
+                            // Cycle through rainbow colors
+                            shadows: [
+                              Shadow(
+                                color: Colors.black54,
+                                // Stronger shadow for depth
+                                blurRadius: 8,
+                                offset: Offset(3, 3),
+                              ),
+                              Shadow(
+                                color: Colors.white.withOpacity(0.7),
+                                // Soft glowing effect
+                                blurRadius: 12,
+                                offset: Offset(-2, -2),
+                              ),
+                            ],
+                          ),
+                        ),
                     ],
                   ),
-                  textAlign: TextAlign.center,
                 ),
               ),
             ),
