@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
-import 'home_screen.dart'; // Import HomeScreen
+import 'home_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class MainScreen extends StatefulWidget {
@@ -9,73 +9,81 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
-  final AudioPlayer _audioPlayer = AudioPlayer(); // Single instance for audio
-  final AudioPlayer _tapPlayer = AudioPlayer(); // For tap sound
+  final AudioPlayer _audioPlayer = AudioPlayer();
+  final AudioPlayer _tapPlayer = AudioPlayer();
 
-  late AnimationController _welcomeController;
+  late AnimationController _logoBounceController;
+  late AnimationController _textPulseController;
   late AnimationController _buttonController;
-  late AnimationController _gifController;
 
-  late Animation<Offset> _welcomeOffsetAnimation;
+  late Animation<double> _logoBounceAnimation;
+  late Animation<double> _textPulseAnimation;
   late Animation<Offset> _buttonOffsetAnimation;
-
-  double _gifOpacity = 0;
+  late Animation<double> _buttonScaleAnimation;
 
   @override
   void initState() {
     super.initState();
     _playBackgroundMusic();
 
-    // Animation controllers and animations
-    _welcomeController = AnimationController(
+    // ✅ Initialize animation controllers before using them
+    _logoBounceController = AnimationController(
       duration: Duration(seconds: 1),
       vsync: this,
-    );
-    _buttonController = AnimationController(
-      duration: Duration(seconds: 1),
-      vsync: this,
-    );
-    _gifController = AnimationController(
-      duration: Duration(seconds: 1),
-      vsync: this,
-    );
+    )..repeat(reverse: true);
 
-    _welcomeOffsetAnimation = Tween<Offset>(
-      begin: Offset(-1.5, 0),
-      end: Offset(0, 0),
+    _logoBounceAnimation = Tween<double>(
+      begin: 1.0,
+      end: 1.1,
     ).animate(CurvedAnimation(
-      parent: _welcomeController,
-      curve: Curves.easeOut,
+      parent: _logoBounceController,
+      curve: Curves.easeInOut,
     ));
+
+    _textPulseController = AnimationController(
+      duration: Duration(seconds: 1),
+      vsync: this,
+    )..repeat(reverse: true);
+
+    _textPulseAnimation = Tween<double>(
+      begin: 1.0,
+      end: 1.05,
+    ).animate(CurvedAnimation(
+      parent: _textPulseController,
+      curve: Curves.easeInOut,
+    ));
+
+    _buttonController = AnimationController(
+      duration: Duration(milliseconds: 700),
+      vsync: this,
+    );
 
     _buttonOffsetAnimation = Tween<Offset>(
       begin: Offset(0, 1.5),
       end: Offset(0, 0),
     ).animate(CurvedAnimation(
       parent: _buttonController,
-      curve: Curves.easeOut,
+      curve: Curves.easeOutBack,
     ));
 
-    // Start animations
+    _buttonScaleAnimation = Tween<double>(
+      begin: 0.8,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _buttonController,
+      curve: Curves.elasticOut,
+    ));
+
     _startAnimations();
   }
 
+
   Future<void> _startAnimations() async {
-    // Start GIF fade-in
-    setState(() => _gifOpacity = 1);
-    _gifController.forward();
-
-    // Welcome text slides in
-    _welcomeController.forward();
-
-    // Slide-in button
-    await Future.delayed(Duration(milliseconds: 500));
     _buttonController.forward();
   }
 
   Future<void> _playBackgroundMusic() async {
-    // Play background music in a loop
-    await _audioPlayer.setReleaseMode(ReleaseMode.loop); // Loop mode
+    await _audioPlayer.setReleaseMode(ReleaseMode.loop);
     await _audioPlayer.play(AssetSource('bg_music.mp3'), volume: 0.5);
   }
 
@@ -87,17 +95,15 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   void dispose() {
     _audioPlayer.dispose();
     _tapPlayer.dispose();
-    _welcomeController.dispose();
+    _logoBounceController.dispose();
+    _textPulseController.dispose();
     _buttonController.dispose();
-    _gifController.dispose();
     super.dispose();
   }
 
   Future<void> _onPlayButtonPressed(BuildContext context) async {
-    // Play tap sound
     await _playTapSound();
 
-    // Show loading for 1 second
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -111,11 +117,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     );
 
     await Future.delayed(Duration(seconds: 1));
-
-    // Close the loading dialog
     Navigator.pop(context);
 
-    // Navigate to HomeScreen with the _audioPlayer instance
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -139,112 +142,127 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Display GIF with fade-in
-            AnimatedOpacity(
-              duration: Duration(seconds: 1),
-              opacity: _gifOpacity,
+            // Animated Logo
+            ScaleTransition(
+              scale: _logoBounceAnimation,
               child: Image.asset(
-                'assets/abc.gif',
+                'assets/alphabet.png',
                 width: 250,
                 height: 250,
+                fit: BoxFit.contain,
+              ),
+            ),
+            SizedBox(height: 10),
+
+            // "Alphabet Guided Learning App" Text with Pulse Animation
+            ScaleTransition(
+              scale: _textPulseAnimation,
+              child: Text(
+                "Alphabet Guided Learning App",
+                textAlign: TextAlign.center,
+                style: GoogleFonts.berkshireSwash(
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.lightBlue,
+                  shadows: [
+                    Shadow(
+                      blurRadius: 6.0,
+                      color: Colors.white,
+                      offset: Offset(2, 2),
+                    ),
+                    Shadow(
+                      blurRadius: 10.0,
+                      color: Colors.white.withOpacity(0.5),
+                      offset: Offset(-1, -1),
+                    ),
+                  ],
+                ),
               ),
             ),
             SizedBox(height: 20),
 
-            // Welcome Text with slide-in animation
-            SlideTransition(
-              position: _welcomeOffsetAnimation,
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.9),
-                  // Increased opacity for better contrast
-                  borderRadius: BorderRadius.circular(15),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black26,
-                      // Darker shadow for a floating effect
-                      blurRadius: 12,
-                      spreadRadius: 2,
-                      offset: Offset(3, 3),
-                    ),
-                  ],
-                ),
-                child: RichText(
-                  textAlign: TextAlign.center,
-                  text: TextSpan(
-                    children: [
-                      for (int i = 0; i < "Welcome to AlphaSpeak!".length; i++)
-                        TextSpan(
-                          text: "Welcome to AlphaSpeak!"[i],
-                          style: GoogleFonts.pacifico(
-                            fontSize: 30,
-                            // Slightly larger for better visibility
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1.2,
-                            color: [
-                              Colors.red,
-                              Colors.orange,
-                              Colors.yellow,
-                              Colors.green,
-                              Colors.blue,
-                              Colors.indigo,
-                              Colors.purple
-                            ][i % 7],
-                            // Cycle through rainbow colors
-                            shadows: [
-                              Shadow(
-                                color: Colors.black54,
-                                // Stronger shadow for depth
-                                blurRadius: 8,
-                                offset: Offset(3, 3),
-                              ),
-                              Shadow(
-                                color: Colors.white.withOpacity(0.7),
-                                // Soft glowing effect
-                                blurRadius: 12,
-                                offset: Offset(-2, -2),
-                              ),
-                            ],
-                          ),
-                        ),
-                    ],
+            // Welcome Text with Soft Glow
+            Text(
+              "Welcome to AlphaSpeak!",
+              textAlign: TextAlign.center,
+              style: GoogleFonts.berkshireSwash(
+                fontSize: 45,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                letterSpacing: 1.5,
+                shadows: [
+                  Shadow(
+                    blurRadius: 8.0,
+                    color: Colors.black54,
+                    offset: Offset(3, 3),
                   ),
-                ),
+                  Shadow(
+                    blurRadius: 12.0,
+                    color: Colors.blueAccent.withOpacity(0.5),
+                    offset: Offset(-2, -2),
+                  ),
+                ],
               ),
             ),
+
             SizedBox(height: 40),
 
-            // Play Button with slide-in animation
+            // Play Button with Ripple Effect
             SlideTransition(
               position: _buttonOffsetAnimation,
-              child: ElevatedButton(
-                onPressed: () => _onPlayButtonPressed(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orangeAccent,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(50),
-                  ),
-                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 20),
-                  elevation: 10,
-                ),
-                child: Text(
-                  'Play',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    shadows: [
-                      Shadow(
-                        color: Colors.black54,
-                        blurRadius: 5,
-                        offset: Offset(2, 2),
+              child: ScaleTransition(
+                scale: _buttonScaleAnimation,
+                child: GestureDetector(
+                  onTapDown: (_) => setState(() => _buttonScaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(CurvedAnimation(parent: _buttonController, curve: Curves.easeOut))),
+                  onTapUp: (_) => setState(() => _buttonScaleAnimation = Tween<double>(begin: 0.95, end: 1.0).animate(CurvedAnimation(parent: _buttonController, curve: Curves.easeOut))),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Colors.orangeAccent, Colors.deepOrange],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
                       ),
-                    ],
+                      borderRadius: BorderRadius.circular(50),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.orangeAccent.withOpacity(0.6),
+                          blurRadius: 15,
+                          offset: Offset(0, 6),
+                        ),
+                      ],
+                    ),
+                    child: ElevatedButton(
+                      onPressed: () => _onPlayButtonPressed(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(50),
+                        ),
+                        padding: EdgeInsets.symmetric(horizontal: 60, vertical: 22),
+                        elevation: 12,
+                      ),
+                      child: Text(
+                        'Play',
+                        style: GoogleFonts.berkshireSwash(
+                          fontSize: 36,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          shadows: [
+                            Shadow(
+                              blurRadius: 6.0,
+                              color: Colors.black54,
+                              offset: Offset(2, 2),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),
             ),
+
           ],
         ),
       ),

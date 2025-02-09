@@ -1,5 +1,5 @@
-// splash_screen.dart
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'main_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -15,12 +15,12 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _navigateToHome() async {
-    // Simulate a loading time of 2 seconds
-    await Future.delayed(Duration(seconds: 3));
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => MainScreen()),
-    );
+    await Future.delayed(Duration(seconds: 5));
+    if (mounted) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => MainScreen()),
+      );
+    }
   }
 
   @override
@@ -29,22 +29,26 @@ class _SplashScreenState extends State<SplashScreen> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        color: Colors.white, // Background color for the splash screen
+        color: Colors.white,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset(
               'assets/alphabet.png',
-              width: 150,
-              height: 150,
+              width: 200,
+              height: 200,
+              fit: BoxFit.contain,
             ),
-            SizedBox(height: 20),
-            Text(
-              'Loading...',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
+            SizedBox(height: 30),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              child: Text(
+                'Loading...',
+                style: GoogleFonts.berkshireSwash(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue.shade900,
+                ),
               ),
             ),
           ],
