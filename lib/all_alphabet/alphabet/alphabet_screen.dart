@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AlphabetScreen extends StatefulWidget {
   final AudioPlayer audioPlayer;
@@ -56,7 +57,7 @@ class _AlphabetScreenState extends State<AlphabetScreen> {
   }
 
   Future<void> _setupTTS() async {
-    await flutterTts.setSpeechRate(0.5);
+    await flutterTts.setSpeechRate(0.4);
     await flutterTts.setPitch(1.0);
     await flutterTts.setLanguage('en-US');
   }
@@ -74,23 +75,29 @@ class _AlphabetScreenState extends State<AlphabetScreen> {
     String soundPath = 'alphabet-sounds/${letter.toLowerCase()}.mp3';
 
     try {
-      // Stop any ongoing audio and TTS before playing a new one
+      // Stop any ongoing speech and sound before playing new letter
       await flutterTts.stop();
       await audioPlayer.stop();
 
-      // Speak the letter and word
-      print('Speaking: $letter is for $word, the sound is...');
-      await flutterTts.speak('$letter is for $word, the sound is');
+      // Step 1: Speak the letter
+      await flutterTts.speak(letter);
       await flutterTts.awaitSpeakCompletion(true);
 
-      // Play the letter sound after TTS
-      print('Playing sound: $soundPath');
+      // Step 2: Speak "The sound is..."
+      await flutterTts.speak("The sound is...");
+      await flutterTts.awaitSpeakCompletion(true);
+
+      // Step 3: Play the letter sound
       await audioPlayer.play(AssetSource(soundPath));
+      await audioPlayer.onPlayerComplete.first; // Wait for sound to finish
+
+      // Step 4: Speak "This word: Apple"
+      await flutterTts.speak("This word: $word");
+      await flutterTts.awaitSpeakCompletion(true);
     } catch (e) {
       print('Error during TTS or audio playback for $letter: $e');
     }
   }
-
 
   Future<void> _scrollToCurrentIndex() async {
     double itemWidth = 80.0;
@@ -120,7 +127,7 @@ class _AlphabetScreenState extends State<AlphabetScreen> {
       appBar: AppBar(
         title: Text(
           'Learn Alphabets',
-          style: TextStyle(color: Colors.white),
+          style: GoogleFonts.berkshireSwash(fontSize: 26, color: Colors.white),
         ),
         iconTheme: IconThemeData(color: Colors.white),
         backgroundColor: Colors.pinkAccent,
@@ -148,18 +155,7 @@ class _AlphabetScreenState extends State<AlphabetScreen> {
           SizedBox(height: 20),
           Text(
             'Loading...',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              shadows: [
-                Shadow(
-                  color: Colors.black45,
-                  blurRadius: 10,
-                  offset: Offset(2, 2),
-                ),
-              ],
-            ),
+            style: GoogleFonts.berkshireSwash(fontSize: 24, color: Colors.white),
           ),
         ],
       ),
@@ -176,20 +172,14 @@ class _AlphabetScreenState extends State<AlphabetScreen> {
             children: [
               Expanded(
                 child: GestureDetector(
-                  onTap: () {
-                    _speakCurrentLetter();
-                  },
+                  onTap: () => _speakCurrentLetter(),
                   child: Container(
                     width: double.infinity,
                     child: Image.asset(
                       'assets/alphabets/${_examples.keys.elementAt(_currentIndex).toLowerCase()}.png',
                       fit: BoxFit.contain,
                       errorBuilder: (context, error, stackTrace) {
-                        return Icon(
-                          Icons.image_not_supported,
-                          size: 100,
-                          color: Colors.grey,
-                        );
+                        return Icon(Icons.image_not_supported, size: 100, color: Colors.grey);
                       },
                     ),
                   ),
@@ -198,18 +188,7 @@ class _AlphabetScreenState extends State<AlphabetScreen> {
               SizedBox(height: 20),
               Text(
                 _examples.values.elementAt(_currentIndex),
-                style: TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                  shadows: [
-                    Shadow(
-                      color: Colors.black45,
-                      blurRadius: 10,
-                      offset: Offset(2, 2),
-                    ),
-                  ],
-                ),
+                style: GoogleFonts.berkshireSwash(fontSize: 30, color: Colors.white),
               ),
             ],
           ),
@@ -227,12 +206,16 @@ class _AlphabetScreenState extends State<AlphabetScreen> {
                 String letter = _examples.keys.elementAt(index);
                 return GestureDetector(
                   onTap: () async {
+                    // Stop previous sound and speech when a new letter is clicked
+                    await flutterTts.stop();
+                    await audioPlayer.stop();
+
                     setState(() {
                       _currentIndex = index;
                     });
 
-                    await _speakCurrentLetter(); // Speak and play sound
-                    await _scrollToCurrentIndex(); // Smoothly center selected letter
+                    await _speakCurrentLetter();
+                    await _scrollToCurrentIndex();
                   },
                   child: AnimatedContainer(
                     duration: Duration(milliseconds: 300),
@@ -240,26 +223,20 @@ class _AlphabetScreenState extends State<AlphabetScreen> {
                     width: _currentIndex == index ? 80 : 60,
                     height: _currentIndex == index ? 80 : 60,
                     decoration: BoxDecoration(
-                      color: _currentIndex == index
-                          ? Colors.pinkAccent
-                          : Colors.white,
+                      color: _currentIndex == index ? Colors.pinkAccent : Colors.white,
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: _currentIndex == index
-                            ? Colors.deepPurple
-                            : Colors.grey,
+                        color: _currentIndex == index ? Colors.deepPurple : Colors.grey,
                         width: 2,
                       ),
                     ),
                     child: Center(
                       child: Text(
                         letter,
-                        style: TextStyle(
+                        style: GoogleFonts.berkshireSwash(
                           fontSize: _currentIndex == index ? 30 : 20,
                           fontWeight: FontWeight.bold,
-                          color: _currentIndex == index
-                              ? Colors.white
-                              : Colors.black,
+                          color: _currentIndex == index ? Colors.white : Colors.black,
                         ),
                       ),
                     ),

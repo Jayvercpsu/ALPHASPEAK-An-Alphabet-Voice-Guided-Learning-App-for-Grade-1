@@ -21,10 +21,13 @@ class _VowelScreenDetailsState extends State<VowelScreenDetails> {
     '/u/': ['mud', 'hug', 'tub', 'sub', 'rub', 'cup'],
   };
 
+  bool _isLoading = true;
+
   @override
   void initState() {
     super.initState();
     _initializeTTS();
+    _startLoading();
   }
 
   void _initializeTTS() {
@@ -32,6 +35,13 @@ class _VowelScreenDetailsState extends State<VowelScreenDetails> {
     flutterTts.setLanguage("en-US");
     flutterTts.setPitch(1.2);
     flutterTts.setSpeechRate(0.5);
+  }
+
+  void _startLoading() async {
+    await Future.delayed(Duration(seconds: 1));
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   void _speak(String text) async {
@@ -45,7 +55,7 @@ class _VowelScreenDetailsState extends State<VowelScreenDetails> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          '${widget.vowel} Words',
+          '${widget.vowel} Vowel Words',
           style: GoogleFonts.berkshireSwash(fontSize: 28, color: Colors.white),
         ),
         backgroundColor: Colors.pinkAccent,
@@ -56,57 +66,66 @@ class _VowelScreenDetailsState extends State<VowelScreenDetails> {
           Positioned.fill(
             child: Image.asset('assets/background1.jpg', fit: BoxFit.cover),
           ),
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'Words with ${widget.vowel}',
-                  style: GoogleFonts.berkshireSwash(fontSize: 28, color: Colors.white),
-                ),
-                SizedBox(height: 20),
-                _buildWordList(words),
-              ],
+
+          if (_isLoading)
+            Center(child: CircularProgressIndicator(color: Colors.pinkAccent))
+          else
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Display Vowel Pronunciation
+                  Text(
+                    widget.vowel,
+                    style: GoogleFonts.berkshireSwash(
+                      fontSize: 80,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.pinkAccent,
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.volume_up, size: 50, color: Colors.pinkAccent),
+                    onPressed: () => _speak(widget.vowel),
+                  ),
+                  SizedBox(height: 20),
+
+                  // Section Title
+                  Text(
+                    "Example Words",
+                    style: GoogleFonts.berkshireSwash(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.blue),
+                  ),
+                  SizedBox(height: 10),
+
+                  // Example Word List
+                  Column(
+                    children: words.map((word) => _wordTile(word)).toList(),
+                  ),
+                ],
+              ),
             ),
-          ),
         ],
       ),
     );
   }
 
-  Widget _buildWordList(List<String> words) {
-    return Wrap(
-      spacing: 10,
-      runSpacing: 10,
-      alignment: WrapAlignment.center,
-      children: words.map((word) => _wordTile(word)).toList(),
-    );
-  }
-
   Widget _wordTile(String word) {
-    return GestureDetector(
-      onTap: () => _speak(word),
-      child: AnimatedContainer(
-        duration: Duration(milliseconds: 200),
-        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+      child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(15),
-          boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(2, 2))],
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              word,
-              style: GoogleFonts.berkshireSwash(fontSize: 24, color: Colors.black87),
-            ),
-            SizedBox(width: 10),
-            IconButton(
-              icon: Icon(Icons.volume_up, color: Colors.pinkAccent),
-              onPressed: () => _speak(word),
-            ),
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(color: Colors.black12, blurRadius: 8, spreadRadius: 1, offset: Offset(3, 3)),
           ],
+        ),
+        child: ListTile(
+          leading: Icon(Icons.volume_up, color: Colors.pinkAccent),
+          title: Text(
+            word,
+            style: GoogleFonts.berkshireSwash(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black87),
+          ),
+          onTap: () => _speak(word),
         ),
       ),
     );

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_tts/flutter_tts.dart';
-import 'consonant_detail_screen.dart'; // Import the new screen
+import 'package:google_fonts/google_fonts.dart';
+import 'consonant_detail_screen.dart';
 
 class ConsonantScreen extends StatefulWidget {
   @override
@@ -14,20 +14,11 @@ class _ConsonantScreenState extends State<ConsonantScreen> {
   ];
 
   bool _isLoading = true;
-  late FlutterTts flutterTts;
 
   @override
   void initState() {
     super.initState();
-    _initializeTTS();
     _startLoading();
-  }
-
-  void _initializeTTS() {
-    flutterTts = FlutterTts();
-    flutterTts.setLanguage("en-US");
-    flutterTts.setPitch(1.2);
-    flutterTts.setSpeechRate(0.5);
   }
 
   void _startLoading() async {
@@ -37,8 +28,11 @@ class _ConsonantScreenState extends State<ConsonantScreen> {
     });
   }
 
-  void _speak(String text) async {
-    await flutterTts.speak(text);
+  void _navigateToDetails(String letter) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => ConsonantDetailScreen(letter: letter)),
+    );
   }
 
   @override
@@ -47,7 +41,7 @@ class _ConsonantScreenState extends State<ConsonantScreen> {
       appBar: AppBar(
         title: Text(
           'Consonants 🎶',
-          style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
+          style: GoogleFonts.berkshireSwash(fontSize: 28, color: Colors.white),
         ),
         backgroundColor: Colors.pinkAccent,
         iconTheme: IconThemeData(color: Colors.white),
@@ -58,19 +52,7 @@ class _ConsonantScreenState extends State<ConsonantScreen> {
             child: Image.asset('assets/background1.jpg', fit: BoxFit.cover),
           ),
           if (_isLoading)
-            Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Colors.pinkAccent)),
-                  SizedBox(height: 20),
-                  Text(
-                    'Loading...',
-                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
-                  ),
-                ],
-              ),
-            )
+            Center(child: CircularProgressIndicator(color: Colors.pinkAccent))
           else
             _buildLetterGrid(),
         ],
@@ -98,31 +80,23 @@ class _ConsonantScreenState extends State<ConsonantScreen> {
 
   Widget _letterTile(String letter) {
     return GestureDetector(
-      onTap: () {
-        _speak(letter); // Speak the consonant
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => ConsonantDetailScreen(letter: letter)), // Open detail screen
-        );
-      },
+      onTap: () => _navigateToDetails(letter),
       child: AnimatedContainer(
         duration: Duration(milliseconds: 200),
-        curve: Curves.easeInOut,
+        padding: EdgeInsets.all(20),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [Colors.pinkAccent, Colors.deepOrangeAccent],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-          borderRadius: BorderRadius.circular(25),
-          boxShadow: [
-            BoxShadow(color: Colors.black26, blurRadius: 10, offset: Offset(4, 4)),
-          ],
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(3, 3))],
         ),
         child: Center(
           child: Text(
             letter,
-            style: TextStyle(fontSize: 60, fontWeight: FontWeight.bold, color: Colors.white),
+            style: GoogleFonts.berkshireSwash(fontSize: 60, fontWeight: FontWeight.bold, color: Colors.white),
           ),
         ),
       ),

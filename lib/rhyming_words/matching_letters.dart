@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:math';
+import 'package:confetti/confetti.dart';
 import 'score_history.dart';
 
 class MatchingLettersScreen extends StatefulWidget {
@@ -17,45 +20,46 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen> {
   final FlutterTts flutterTts = FlutterTts();
   final Random _random = Random();
   final AudioPlayer _audioPlayer = AudioPlayer();
+  late ConfettiController _confettiController;
 
-  String _targetLetter = 'A';
-  List<String> _squareLetters = [];
-  Map<String, bool?> _letterStates = {};
-  int _score = 0; // Score tracker
+  String _targetWord = 'hot';
+  List<String> _wordOptions = [];
+  Map<String, bool?> _wordStates = {};
+  int _score = 0;
   bool _isAnimating = false;
   bool _isLoading = true;
+
+  final Map<String, List<String>> rhymingWords = {
+    'hot': ['pot', 'cot', 'dot'],
+    'cat': ['bat', 'rat', 'mat'],
+    'sun': ['fun', 'run', 'bun'],
+    'pen': ['ten', 'men', 'den'],
+    'win': ['bin', 'tin', 'fin'],
+    'dog': ['fog', 'log', 'hog'],
+    'cap': ['map', 'lap', 'tap'],
+    'hop': ['mop', 'top', 'pop'],
+    'red': ['bed', 'led', 'fed'],
+    'zip': ['tip', 'dip', 'nip'],
+  };
 
   @override
   void initState() {
     super.initState();
+    _confettiController = ConfettiController(duration: Duration(seconds: 2));
+    _loadScore();
     _startLoading();
   }
 
-  Future<void> _startLoading() async {
-    await Future.delayed(Duration(milliseconds: 1000));
-    _randomizeLetters();
-    _speakTargetLetter();
+  Future<void> _loadScore() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      _isLoading = false;
+      _score = prefs.getInt('game_score') ?? 0;
     });
   }
 
-  void _randomizeLetters() {
-    Set<String> lettersSet = {};
-    while (lettersSet.length < 4) {
-      lettersSet.add(String.fromCharCode(_random.nextInt(26) + 65)); // A-Z
-    }
-
-    _squareLetters = lettersSet.toList();
-    _targetLetter = _squareLetters[_random.nextInt(4)];
-    _letterStates = {
-      for (var letter in _squareLetters) letter: null,
-    };
-    setState(() {});
-  }
-
-  Future<void> _speakTargetLetter() async {
-    await flutterTts.speak('Select the letter $_targetLetter');
+  Future<void> _saveScore() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setInt('game_score', _score);
   }
 
   Future<void> _playAudio(String path) async {
@@ -67,31 +71,57 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen> {
     }
   }
 
-  Future<void> _handleSelection(String selectedLetter) async {
+  Future<void> _startLoading() async {
+    await Future.delayed(Duration(milliseconds: 1000));
+    _randomizeWords();
+    _speakTargetWord();
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  void _randomizeWords() {
+    List<String> keys = rhymingWords.keys.toList();
+    _targetWord = keys[_random.nextInt(keys.length)];
+
+    List<String> choices = List.from(rhymingWords[_targetWord]!);
+    choices.add(_targetWord);
+    choices.shuffle();
+
+    _wordOptions = choices.take(4).toList();
+    _wordStates = {for (var word in _wordOptions) word: null};
+
+    setState(() {});
+  }
+
+  Future<void> _speakTargetWord() async {
+    await flutterTts.speak('Find the word that rhymes with $_targetWord');
+  }
+
+  Future<void> _handleSelection(String selectedWord) async {
     if (_isAnimating) return;
 
-    if (selectedLetter == _targetLetter) {
+    if (selectedWord == _targetWord) {
       setState(() {
-        _letterStates[selectedLetter] = true;
+        _wordStates[selectedWord] = true;
         _isAnimating = true;
-        _score++; // Increment the score for a correct answer
+        _score++;
       });
+      _confettiController.play();
+      await _saveScore();
       await _playAudio('alphabet-sounds/correct.mp3');
       await flutterTts.speak('Correct!');
+
       await Future.delayed(Duration(seconds: 1));
-      _randomizeLetters();
-      _speakTargetLetter();
+      _randomizeWords();
+      _speakTargetWord();
       _isAnimating = false;
     } else {
-      setState(() {
-        _letterStates[selectedLetter] = false;
-      });
+      setState(() => _wordStates[selectedWord] = false);
       await _playAudio('alphabet-sounds/wrong.mp3');
       await flutterTts.speak('Wrong!');
       await Future.delayed(Duration(milliseconds: 500));
-      setState(() {
-        _letterStates[selectedLetter] = null;
-      });
+      setState(() => _wordStates[selectedWord] = null);
     }
   }
 
@@ -99,6 +129,7 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen> {
   void dispose() {
     flutterTts.stop();
     _audioPlayer.dispose();
+    _confettiController.dispose();
     super.dispose();
   }
 
@@ -106,55 +137,60 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.pinkAccent,
         title: Text(
-          'Matching Letters',
-          style: TextStyle(color: Colors.white),
+          'Rhyming Words 🎶',
+          style: GoogleFonts.berkshireSwash(fontSize: 28, color: Colors.white),
         ),
         actions: [
-          // Score button in the top-right corner
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ScoreHistoryScreen(
-                      initialScore: _score,
-                      resetScore: () {
-                        setState(() {
-                          _score = 0; // Reset the score to 0
-                        });
-                      },
-                    ),
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ScoreHistoryScreen(
+                    initialScore: _score,
+                    resetScore: _resetScore,
                   ),
-
-                );
-              },
-              child: Row(
-                children: [
-                  Icon(Icons.scoreboard, color: Colors.white),
-                  SizedBox(width: 4),
-                  Text(
-                    'Score: $_score',
-                    style: TextStyle(fontSize: 16, color: Colors.white),
-                  ),
-                ],
+                ),
+              );
+            },
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                'Score: $_score', // ✅ Clickable score
+                style: GoogleFonts.berkshireSwash(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white, // ✅ Text color pink for contrast
+                ),
               ),
             ),
           ),
         ],
-        iconTheme: IconThemeData(color: Colors.white),
-        backgroundColor: Colors.pinkAccent,
+        iconTheme: IconThemeData(color: Colors.white), // ✅ Set back button color to pink
       ),
-      body: Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/background1.jpg'),
-            fit: BoxFit.cover,
+
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset('assets/background1.jpg', fit: BoxFit.cover),
           ),
-        ),
-        child: _isLoading ? _buildLoadingScreen() : _buildGameScreen(),
+          if (_isLoading)
+            _buildLoadingScreen()
+          else
+            _buildGameScreen(),
+          Align(
+            alignment: Alignment.topCenter,
+            child: ConfettiWidget(
+              confettiController: _confettiController,
+              blastDirection: pi / 2,
+              emissionFrequency: 0.05,
+              numberOfParticles: 20,
+              gravity: 0.3,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -169,70 +205,55 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen> {
 
   Widget _buildGameScreen() {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center, // Center everything vertically
-      crossAxisAlignment: CrossAxisAlignment.center, // Align items to the center horizontally
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        // Target letter text with background
-        Padding(
-          padding: const EdgeInsets.only(top: 32.0, left: 16.0, right: 16.0), // Adjust top margin
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.pinkAccent, Colors.orangeAccent], // Gradient background
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+        Text(
+          'Find the word that rhymes with:',
+          style: GoogleFonts.berkshireSwash(fontSize: 24, color: Colors.white),
+        ),
+        SizedBox(height: 10),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.9),
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(3, 3))],
+          ),
+          padding: EdgeInsets.symmetric(vertical: 15, horizontal: 30),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                _targetWord,
+                style: GoogleFonts.berkshireSwash(fontSize: 36, fontWeight: FontWeight.bold, color: Colors.pinkAccent),
               ),
-              borderRadius: BorderRadius.circular(12), // Rounded corners
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black26, // Subtle shadow
-                  blurRadius: 8,
-                  offset: Offset(2, 4),
-                ),
-              ],
-            ),
-            padding: EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-            child: Text(
-              'Select: $_targetLetter',
-              style: TextStyle(
-                fontSize: 36,
-                fontWeight: FontWeight.bold,
-                color: Colors.white, // Text color
-                shadows: [
-                  Shadow(
-                    color: Colors.black45,
-                    blurRadius: 10,
-                    offset: Offset(2, 2),
-                  ),
-                ],
+              SizedBox(width: 10),
+              IconButton(
+                icon: Icon(Icons.volume_up, size: 40, color: Colors.pinkAccent),
+                onPressed: () => _speakTargetWord(),
               ),
-            ),
+            ],
           ),
         ),
-
-  Expanded(
-          child: Center(
-            child: GridView.builder(
-              shrinkWrap: true,
-              padding: EdgeInsets.all(16.0),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                mainAxisSpacing: 16,
-                crossAxisSpacing: 16,
-              ),
-              itemCount: _squareLetters.length,
-              itemBuilder: (context, index) {
-                return _buildSquareButton(_squareLetters[index]);
-              },
-            ),
+        SizedBox(height: 20),
+        GridView.builder(
+          shrinkWrap: true,
+          padding: EdgeInsets.all(16.0),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            mainAxisSpacing: 16,
+            crossAxisSpacing: 16,
           ),
+          itemCount: _wordOptions.length,
+          itemBuilder: (context, index) {
+            return _buildWordButton(_wordOptions[index]);
+          },
         ),
       ],
     );
   }
 
-  Widget _buildSquareButton(String letter) {
-    final state = _letterStates[letter];
+  Widget _buildWordButton(String word) {
+    final state = _wordStates[word];
     final color = state == null
         ? Colors.pinkAccent
         : state
@@ -240,10 +261,9 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen> {
         : Colors.red;
 
     return GestureDetector(
-      onTap: () => _handleSelection(letter),
+      onTap: () => _handleSelection(word),
       child: AnimatedContainer(
         duration: Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [color.withOpacity(0.8), color],
@@ -251,32 +271,22 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen> {
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.3),
-              blurRadius: 8,
-              offset: Offset(2, 2),
-            ),
-          ],
         ),
         child: Center(
           child: Text(
-            letter,
-            style: TextStyle(
-              fontSize: 48,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              shadows: [
-                Shadow(
-                  color: Colors.black45,
-                  blurRadius: 5,
-                  offset: Offset(2, 2),
-                ),
-              ],
-            ),
+            word,
+            style: GoogleFonts.berkshireSwash(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
           ),
         ),
       ),
     );
+  }
+
+  Future<void> _resetScore() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('game_score');
+    setState(() {
+      _score = 0;
+    });
   }
 }

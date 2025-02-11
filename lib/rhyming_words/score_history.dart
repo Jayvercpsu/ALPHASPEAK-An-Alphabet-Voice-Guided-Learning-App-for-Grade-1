@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:audioplayers/audioplayers.dart'; // Add this package in pubspec.yaml
+import 'package:audioplayers/audioplayers.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:confetti/confetti.dart';
+import 'dart:math';
+
 
 class ScoreHistoryScreen extends StatefulWidget {
   final int initialScore;
@@ -13,13 +17,14 @@ class ScoreHistoryScreen extends StatefulWidget {
 
 class _ScoreHistoryScreenState extends State<ScoreHistoryScreen> {
   late int _currentScore; // Local state to manage the score
-
   final AudioPlayer _audioPlayer = AudioPlayer();
+  late ConfettiController _confettiController;
 
   @override
   void initState() {
     super.initState();
     _currentScore = widget.initialScore; // Initialize the score
+    _confettiController = ConfettiController(duration: Duration(seconds: 2));
   }
 
   Future<void> _playTapSound() async {
@@ -31,6 +36,7 @@ class _ScoreHistoryScreenState extends State<ScoreHistoryScreen> {
       _currentScore = 0; // Reset the local score
     });
     widget.resetScore(); // Call the parent callback to reset the score globally
+    _confettiController.play();
     _showSuccessMessage(); // Show success message
   }
 
@@ -38,8 +44,8 @@ class _ScoreHistoryScreenState extends State<ScoreHistoryScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          'Score has been reset successfully!',
-          style: TextStyle(fontSize: 16, color: Colors.white),
+          '🎉 Score has been reset successfully!',
+          style: GoogleFonts.berkshireSwash(fontSize: 16, color: Colors.white),
         ),
         backgroundColor: Colors.green,
         behavior: SnackBarBehavior.floating,
@@ -54,11 +60,11 @@ class _ScoreHistoryScreenState extends State<ScoreHistoryScreen> {
         return AlertDialog(
           title: Text(
             'Confirm Reset',
-            style: TextStyle(fontWeight: FontWeight.bold),
+            style: GoogleFonts.berkshireSwash(fontSize: 22, fontWeight: FontWeight.bold),
           ),
           content: Text(
             'Are you sure you want to reset the score?',
-            style: TextStyle(fontSize: 16),
+            style: GoogleFonts.berkshireSwash(fontSize: 18),
           ),
           actions: [
             TextButton(
@@ -67,7 +73,7 @@ class _ScoreHistoryScreenState extends State<ScoreHistoryScreen> {
               },
               child: Text(
                 'Cancel',
-                style: TextStyle(color: Colors.blueAccent),
+                style: TextStyle(color: Colors.blueAccent, fontSize: 18),
               ),
             ),
             TextButton(
@@ -77,7 +83,7 @@ class _ScoreHistoryScreenState extends State<ScoreHistoryScreen> {
               },
               child: Text(
                 'Reset',
-                style: TextStyle(color: Colors.redAccent),
+                style: TextStyle(color: Colors.redAccent, fontSize: 18),
               ),
             ),
           ],
@@ -91,98 +97,107 @@ class _ScoreHistoryScreenState extends State<ScoreHistoryScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Score History',
-          style: TextStyle(color: Colors.white),// Set text color to white
+          'Score History 🏆',
+          style: GoogleFonts.berkshireSwash(fontSize: 26, color: Colors.white),
         ),
-        backgroundColor: Colors.pinkAccent, // Keep the background color as is
-        iconTheme: IconThemeData(color: Colors.white), // Set the arrow color to white
+        backgroundColor: Colors.pinkAccent,
+        iconTheme: IconThemeData(color: Colors.white),
       ),
-
-      body: Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/background1.jpg'),
-            fit: BoxFit.cover,
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset('assets/background1.jpg', fit: BoxFit.cover),
           ),
-        ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.scoreboard, size: 100, color: Colors.yellowAccent),
-              SizedBox(height: 20),
-              Container(
-                padding: EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.7),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  'Your Current Score:',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+          Align(
+            alignment: Alignment.topCenter,
+            child: ConfettiWidget(
+              confettiController: _confettiController,
+              blastDirection: pi / 2,
+              emissionFrequency: 0.05,
+              numberOfParticles: 20,
+              gravity: 0.3,
+            ),
+          ),
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.emoji_events, size: 100, color: Colors.yellowAccent),
+                SizedBox(height: 20),
+                Container(
+                  padding: EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(3, 3)),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        'Your Current Score:',
+                        style: GoogleFonts.berkshireSwash(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.pinkAccent),
+                      ),
+                      SizedBox(height: 10),
+                      Text(
+                        '$_currentScore',
+                        style: GoogleFonts.berkshireSwash(fontSize: 48, fontWeight: FontWeight.bold, color: Colors.deepOrangeAccent),
+                      ),
+                    ],
                   ),
                 ),
-              ),
-              SizedBox(height: 10),
-              Container(
-                padding: EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.7),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Colors.white, width: 2),
-                ),
-                child: Text(
-                  '$_currentScore',
-                  style: TextStyle(
-                    fontSize: 48,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-              SizedBox(height: 30),
-              ElevatedButton(
-                onPressed: () async {
-                  await _playTapSound(); // Play tap sound
+                SizedBox(height: 20),
+                _buildButton('Reset Score', Colors.redAccent, Icons.refresh, () async {
+                  await _playTapSound();
+                  _showConfirmationDialog();
+                }),
+                SizedBox(height: 30),
+                _buildButton('Back to Game', Colors.blueAccent, Icons.arrow_back, () async {
+                  await _playTapSound();
                   Navigator.pop(context);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blueAccent,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                ),
-                child: Text(
-                  'Back to Game',
-                  style: TextStyle(fontSize: 20, color: Colors.white),
-                ),
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () async {
-                  await _playTapSound(); // Play tap sound
-                  _showConfirmationDialog(); // Show confirmation dialog before reset
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.redAccent,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                ),
-                child: Text(
-                  'Reset Score',
-                  style: TextStyle(fontSize: 20, color: Colors.white),
-                ),
-              ),
-            ],
+                }),
+              ],
+            ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildButton(String text, Color color, IconData icon, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(2, 2)),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: Colors.white),
+            SizedBox(width: 10),
+            Text(
+              text,
+              style: GoogleFonts.berkshireSwash(fontSize: 20, color: Colors.white),
+            ),
+          ],
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _confettiController.dispose();
+    _audioPlayer.dispose();
+    super.dispose();
   }
 }
