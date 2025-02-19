@@ -89,10 +89,24 @@ class _VowelScreenDetailsState extends State<VowelScreenDetails> {
                   ),
                   SizedBox(height: 20),
 
-                  // Section Title
-                  Text(
-                    "Example Words",
-                    style: GoogleFonts.berkshireSwash(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.blue),
+                  // Section Title with Background Color
+                  Container(
+                    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                    decoration: BoxDecoration(
+                      color: Colors.pinkAccent, // Background color added
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(color: Colors.black26, blurRadius: 5, offset: Offset(3, 3)),
+                      ],
+                    ),
+                    child: Text(
+                      "Example Words",
+                      style: GoogleFonts.berkshireSwash(
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white, // White text for contrast
+                      ),
+                    ),
                   ),
                   SizedBox(height: 10),
 

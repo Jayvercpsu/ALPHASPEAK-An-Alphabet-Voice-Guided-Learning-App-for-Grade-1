@@ -61,9 +61,10 @@ class _ConsonantDetailScreenState extends State<ConsonantDetailScreen> {
       appBar: AppBar(
         title: Text(
           '${widget.letter} Consonant Words',
-          style: GoogleFonts.berkshireSwash(fontSize: 24, color: Colors.white),
+          style: GoogleFonts.berkshireSwash(fontSize: 28, color: Colors.white),
         ),
         backgroundColor: Colors.pinkAccent,
+        iconTheme: IconThemeData(color: Colors.white),
       ),
       body: Stack(
         children: [
@@ -89,11 +90,29 @@ class _ConsonantDetailScreenState extends State<ConsonantDetailScreen> {
                   onPressed: () => _speak(widget.letter),
                 ),
                 SizedBox(height: 20),
-                Text(
-                  "Example Words",
-                  style: GoogleFonts.berkshireSwash(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.blue),
+
+                // Section Title with Pink Accent Background and White Text
+                Container(
+                  padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                  decoration: BoxDecoration(
+                    color: Colors.pinkAccent,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(color: Colors.black26, blurRadius: 5, offset: Offset(3, 3)),
+                    ],
+                  ),
+                  child: Text(
+                    "Example Words",
+                    style: GoogleFonts.berkshireSwash(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white, // White text for contrast
+                    ),
+                  ),
                 ),
                 SizedBox(height: 10),
+
+                // Example Word List
                 Column(
                   children: exampleWords.map((word) => _wordTile(word)).toList(),
                 ),

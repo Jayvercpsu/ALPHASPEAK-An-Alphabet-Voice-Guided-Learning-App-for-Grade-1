@@ -68,65 +68,86 @@ class _MainAlphabetState extends State<MainAlphabet> with TickerProviderStateMix
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _animatedCategoryButton(
-                        context,
-                        '📖 ALL LETTERS',
-                        screenWidth,
-                        AlphabetScreen(audioPlayer: widget.audioPlayer)),
+                    _interactiveCategoryButton(
+                      context,
+                      'All Letters',
+                      Icons.menu_book_rounded, // 📖 Book icon for all letters
+                      Colors.blueAccent,
+                      AlphabetScreen(audioPlayer: widget.audioPlayer),
+                    ),
                     SizedBox(height: 25),
-                    _animatedCategoryButton(
-                        context, '🔤 VOWELS', screenWidth, VowelScreen()),
+                    _interactiveCategoryButton(
+                      context,
+                      'Vowels',
+                      Icons.auto_awesome, // ✨ Alternative icon for vowels
+                      Colors.pinkAccent,
+                      VowelScreen(),
+                    ),
                     SizedBox(height: 25),
-                    _animatedCategoryButton(
-                        context, '🅰️ CONSONANTS', screenWidth, ConsonantScreen()),
+                    _interactiveCategoryButton(
+                      context,
+                      'Consonants',
+                      Icons.abc, // 🔤 ABC icon for consonants
+                      Colors.deepOrangeAccent,
+                      ConsonantScreen(),
+                    ),
                   ],
                 ),
               ),
             ),
           ),
+
         ],
       ),
     );
   }
 
-  Widget _animatedCategoryButton(
-      BuildContext context, String category, double screenWidth, Widget screen) {
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 1.0, end: 0.0),
-      duration: Duration(milliseconds: 500),
-      builder: (context, value, child) {
-        return Transform.translate(
-          offset: Offset(0, value * 30), // Slide effect on load
-          child: SizedBox(
-            width: screenWidth * 0.85,
-            height: 80,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.pinkAccent.withOpacity(0.95),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                elevation: 6,
-              ),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => screen),
-                );
-              },
-              child: Text(
-                category,
-                style: GoogleFonts.berkshireSwash(
-                  color: Colors.white,
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.5,
-                ),
+  Widget _interactiveCategoryButton(
+      BuildContext context, String title, IconData icon, Color color, Widget screen) {
+    return GestureDetector(
+      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => screen)),
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+        padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [color.withOpacity(0.8), color],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(25),
+          boxShadow: [
+            BoxShadow(color: Colors.black26, blurRadius: 8, offset: Offset(4, 4)),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 40, color: Colors.white),
+            SizedBox(width: 10),
+            Text(
+              title,
+              style: GoogleFonts.berkshireSwash(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                shadows: [
+                  Shadow(
+                    color: Colors.black.withOpacity(0.3),
+                    blurRadius: 5,
+                    offset: Offset(2, 3),
+                  ),
+                ],
               ),
             ),
-          ),
-        );
-      },
+          ],
+        ),
+      ),
     );
   }
-}
+
+
+
+  }
+
