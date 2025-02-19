@@ -92,7 +92,7 @@ class _AlphabetScreenState extends State<AlphabetScreen> {
       await audioPlayer.onPlayerComplete.first; // Wait for sound to finish
 
       // Step 4: Speak "This word: Apple"
-      await flutterTts.speak("This word: $word");
+      await flutterTts.speak("$word");
       await flutterTts.awaitSpeakCompletion(true);
     } catch (e) {
       print('Error during TTS or audio playback for $letter: $e');

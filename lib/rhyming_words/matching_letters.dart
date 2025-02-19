@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:math';
 import 'package:confetti/confetti.dart';
 import 'score_history.dart';
+import 'package:learn_alphabet/rhyming_words/list_rhyme.dart';
 
 class MatchingLettersScreen extends StatefulWidget {
   final AudioPlayer audioPlayer;
@@ -28,19 +29,6 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen> {
   int _score = 0;
   bool _isAnimating = false;
   bool _isLoading = true;
-
-  final Map<String, List<String>> rhymingWords = {
-    'hot': ['pot', 'cot', 'dot'],
-    'cat': ['bat', 'rat', 'mat'],
-    'sun': ['fun', 'run', 'bun'],
-    'pen': ['ten', 'men', 'den'],
-    'win': ['bin', 'tin', 'fin'],
-    'dog': ['fog', 'log', 'hog'],
-    'cap': ['map', 'lap', 'tap'],
-    'hop': ['mop', 'top', 'pop'],
-    'red': ['bed', 'led', 'fed'],
-    'zip': ['tip', 'dip', 'nip'],
-  };
 
   @override
   void initState() {
@@ -81,18 +69,19 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen> {
   }
 
   void _randomizeWords() {
-    List<String> keys = rhymingWords.keys.toList();
+    List<String> keys = correctRhymingWords.keys.toList();
     _targetWord = keys[_random.nextInt(keys.length)];
 
-    List<String> choices = List.from(rhymingWords[_targetWord]!);
-    choices.add(_targetWord);
+    String correctWord = correctRhymingWords[_targetWord]!;
+    List<String> choices = [correctWord, ...wrongChoices[_targetWord]!];
     choices.shuffle();
 
-    _wordOptions = choices.take(4).toList();
+    _wordOptions = choices;
     _wordStates = {for (var word in _wordOptions) word: null};
 
     setState(() {});
   }
+
 
   Future<void> _speakTargetWord() async {
     await flutterTts.speak('Find the word that rhymes with $_targetWord');
@@ -101,7 +90,9 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen> {
   Future<void> _handleSelection(String selectedWord) async {
     if (_isAnimating) return;
 
-    if (selectedWord == _targetWord) {
+    await _audioPlayer.stop(); // Stop any currently playing audio
+
+    if (selectedWord == correctRhymingWords[_targetWord]) {
       setState(() {
         _wordStates[selectedWord] = true;
         _isAnimating = true;
@@ -118,12 +109,14 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen> {
       _isAnimating = false;
     } else {
       setState(() => _wordStates[selectedWord] = false);
-      await _playAudio('alphabet-sounds/wrong.mp3');
-      await flutterTts.speak('Wrong!');
+      await _playAudio('alphabet-sounds/wrong.mp3'); // Play wrong audio instantly
+      await flutterTts.stop(); // Stop any ongoing TTS before speaking
+      flutterTts.speak('Wrong!'); // Speak "Wrong!" immediately
       await Future.delayed(Duration(milliseconds: 500));
       setState(() => _wordStates[selectedWord] = null);
     }
   }
+
 
   @override
   void dispose() {
@@ -139,7 +132,7 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen> {
       appBar: AppBar(
         backgroundColor: Colors.pinkAccent,
         title: Text(
-          'Rhyming Words 🎶',
+          'Rhyme Words ',
           style: GoogleFonts.berkshireSwash(fontSize: 28, color: Colors.white),
         ),
         actions: [
@@ -207,16 +200,40 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text(
-          'Find the word that rhymes with:',
-          style: GoogleFonts.berkshireSwash(fontSize: 24, color: Colors.white),
+        Container(
+          padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+          decoration: BoxDecoration(
+            color: Colors.pinkAccent.withOpacity(0.8), // Background color
+            borderRadius: BorderRadius.circular(12), // Rounded corners
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black26,
+                blurRadius: 6,
+                offset: Offset(2, 4),
+              ),
+            ],
+          ),
+          child: Text(
+            'Find the word that rhymes with:',
+            style: GoogleFonts.berkshireSwash(
+              fontSize: 24,
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ),
         SizedBox(height: 10),
         Container(
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.9),
             borderRadius: BorderRadius.circular(12),
-            boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(3, 3))],
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 8,
+                offset: Offset(3, 3),
+              ),
+            ],
           ),
           padding: EdgeInsets.symmetric(vertical: 15, horizontal: 30),
           child: Row(
@@ -224,7 +241,11 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen> {
             children: [
               Text(
                 _targetWord,
-                style: GoogleFonts.berkshireSwash(fontSize: 36, fontWeight: FontWeight.bold, color: Colors.pinkAccent),
+                style: GoogleFonts.berkshireSwash(
+                  fontSize: 36,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.pinkAccent,
+                ),
               ),
               SizedBox(width: 10),
               IconButton(
