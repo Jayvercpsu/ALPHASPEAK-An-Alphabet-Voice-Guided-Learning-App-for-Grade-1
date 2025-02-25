@@ -19,6 +19,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final AudioPlayer _tapPlayer = AudioPlayer();
+  bool _isMuted = false;
 
   @override
   void initState() {
@@ -27,21 +28,38 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _resumeBackgroundMusic() async {
-    await widget.audioPlayer.setReleaseMode(ReleaseMode.loop);
-    await widget.audioPlayer.resume();
+    if (!_isMuted) {
+      await widget.audioPlayer.setReleaseMode(ReleaseMode.loop);
+      await widget.audioPlayer.resume();
+    }
   }
 
-  Future<void> _stopBackgroundMusic() async {
+  Future<void> _stopAllSounds() async {
     await widget.audioPlayer.pause();
+    await _tapPlayer.stop();
   }
 
   Future<void> _playTapSound() async {
-    await _tapPlayer.play(AssetSource('alphabet-sounds/tap.mp3'), volume: 1.0);
+    if (!_isMuted) {
+      await _tapPlayer.play(AssetSource('alphabet-sounds/tap.mp3'), volume: 1.0);
+    }
+  }
+
+  void _toggleMute() {
+    setState(() {
+      _isMuted = !_isMuted;
+      if (_isMuted) {
+        _stopAllSounds();
+      } else {
+        _resumeBackgroundMusic();
+      }
+    });
   }
 
   @override
   void dispose() {
     _tapPlayer.dispose();
+    widget.audioPlayer.dispose();
     super.dispose();
   }
 
@@ -53,7 +71,6 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // Background Image
           Positioned.fill(
             child: Image.asset(
               'assets/background1.jpg',
@@ -61,134 +78,129 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           SafeArea(
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Animated Floating Logo
-                  TweenAnimationBuilder(
-                    duration: Duration(seconds: 2),
-                    tween: Tween<double>(begin: 0, end: 10),
-                    curve: Curves.easeInOut,
-                    builder: (context, double value, child) {
-                      return Transform.translate(
-                        offset: Offset(0, sin(value) * 5),
-                        child: Image.asset(
-                          'assets/alphabet.png',
-                          height: 150,
-                          fit: BoxFit.contain,
-                        ),
-                      );
-                    },
-                  ),
-                  SizedBox(height: 20),
-
-                  // App Title
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    child: Container(
-                      padding: EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.9),
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black12,
-                            blurRadius: 10,
-                            spreadRadius: 2,
-                            offset: Offset(3, 3),
-                          ),
-                        ],
-                      ),
-                      child: Text(
-                        "AlphaSpeak: Alphabet Learning App",
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.berkshireSwash(
-                          fontSize: 30,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                          letterSpacing: 1.2,
-                          shadows: [
-                            Shadow(
-                              color: Colors.white,
-                              blurRadius: 5,
-                              offset: Offset(2, 2),
-                            ),
-                          ],
-                        ),
-                      ),
+            child: Column(
+              children: [
+                Align(
+                  alignment: Alignment.topRight,
+                  child: IconButton(
+                    icon: Image.asset(
+                      _isMuted ? 'assets/mute.png' : 'assets/unmute.png',
+                      width: 40,
+                      height: 40,
                     ),
+                    onPressed: _toggleMute,
                   ),
-                  SizedBox(height: 30),
-
-                  // Features Section
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        _buildFeatureRow(
-                          context,
-                          [
-                            _FeatureItem(
-                              text: "Learn Alphabet",
-                              imagePath: 'assets/home-screen/abc.png',
-                              screen: MainAlphabet(audioPlayer: widget.audioPlayer),
-                            ),
-                            _FeatureItem(
-                              text: "Rhyming Words",
-                              imagePath: 'assets/home-screen/matching.png',
-                              screen: MatchingLettersScreen(audioPlayer: widget.audioPlayer),
-                            ),
-                          ],
-                          buttonWidth,
-                          buttonHeight,
-                          slideFromLeft: true,
-                          delayMilliseconds: 100,
+                        TweenAnimationBuilder(
+                          duration: Duration(seconds: 2),
+                          tween: Tween<double>(begin: 0, end: 10),
+                          curve: Curves.easeInOut,
+                          builder: (context, double value, child) {
+                            return Transform.translate(
+                              offset: Offset(0, sin(value) * 5),
+                              child: Image.asset(
+                                'assets/alphabet.png',
+                                height: 150,
+                                fit: BoxFit.contain,
+                              ),
+                            );
+                          },
                         ),
                         SizedBox(height: 20),
-
-                        _buildFeatureRow(
-                          context,
-                          [
-                            _FeatureItem(
-                              text: "Check Pronunciation",
-                              imagePath: 'assets/home-screen/voice.png',
-                              screen: CheckPronunciationScreen(audioPlayer: widget.audioPlayer),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                          child: Container(
+                            padding: EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.9),
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black12,
+                                  blurRadius: 10,
+                                  spreadRadius: 2,
+                                  offset: Offset(3, 3),
+                                ),
+                              ],
                             ),
-                            _FeatureItem(
-                              text: "Word Puzzle",
-                              imagePath: 'assets/home-screen/puzzle.png',
-                              screen: WordPuzzleScreen(audioPlayer: widget.audioPlayer),
+                            child: Text(
+                              "AlphaSpeak: Alphabet Learning App",
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.berkshireSwash(
+                                fontSize: 30,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                                letterSpacing: 1.2,
+                                shadows: [
+                                  Shadow(
+                                    color: Colors.white,
+                                    blurRadius: 5,
+                                    offset: Offset(2, 2),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ],
-                          buttonWidth,
-                          buttonHeight,
-                          slideFromLeft: false,
-                          delayMilliseconds: 200,
+                          ),
                         ),
-                        SizedBox(height: 20),
-
-                        _buildFeatureRow(
-                          context,
-                          [
-                            _FeatureItem(
-                              text: "Fill Words",
-                              imagePath: 'assets/home-screen/fill_in.png',
-                              screen: FillWordsScreen(audioPlayer: widget.audioPlayer),
-                            ),
-                          ],
-                          buttonWidth,
-                          buttonHeight,
-                          slideFromLeft: true,
-                          delayMilliseconds: 300,
+                        SizedBox(height: 30),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              _buildFeatureRow(
+                                context,
+                                [
+                                  _FeatureItem(
+                                    text: "Learn Alphabet",
+                                    imagePath: 'assets/home-screen/abc.png',
+                                    screen: MainAlphabet(audioPlayer: widget.audioPlayer),
+                                  ),
+                                  _FeatureItem(
+                                    text: "Rhyming Words",
+                                    imagePath: 'assets/home-screen/matching.png',
+                                    screen: MatchingLettersScreen(audioPlayer: widget.audioPlayer),
+                                  ),
+                                ],
+                                buttonWidth,
+                                buttonHeight,
+                                slideFromLeft: true,
+                                delayMilliseconds: 100,
+                              ),
+                              SizedBox(height: 20),
+                              _buildFeatureRow(
+                                context,
+                                [
+                                  _FeatureItem(
+                                    text: "Check Pronunciation",
+                                    imagePath: 'assets/home-screen/voice.png',
+                                    screen: CheckPronunciationScreen(audioPlayer: widget.audioPlayer),
+                                  ),
+                                  _FeatureItem(
+                                    text: "Word Puzzle",
+                                    imagePath: 'assets/home-screen/puzzle.png',
+                                    screen: WordPuzzleScreen(audioPlayer: widget.audioPlayer),
+                                  ),
+                                ],
+                                buttonWidth,
+                                buttonHeight,
+                                slideFromLeft: false,
+                                delayMilliseconds: 200,
+                              ),
+                              SizedBox(height: 40),
+                            ],
+                          ),
                         ),
                       ],
                     ),
                   ),
-                  SizedBox(height: 40),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ],
@@ -212,7 +224,7 @@ class _HomeScreenState extends State<HomeScreen> {
             slideFromLeft: slideFromLeft,
             delayMilliseconds: delayMilliseconds,
             playTapSound: _playTapSound,
-            stopBackgroundMusic: _stopBackgroundMusic,
+            stopBackgroundMusic: _stopAllSounds,
             resumeBackgroundMusic: _resumeBackgroundMusic,
           ),
         );
@@ -229,7 +241,6 @@ class _FeatureItem {
   _FeatureItem({required this.text, required this.imagePath, required this.screen});
 }
 
-// Animated Feature Button
 class _FeatureButton extends StatefulWidget {
   final String text, imagePath;
   final double width, height;
@@ -292,11 +303,7 @@ class _FeatureButtonState extends State<_FeatureButton> {
                 ),
                 child: Text(
                   widget.text,
-                  style: GoogleFonts.berkshireSwash(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
+                  style: GoogleFonts.berkshireSwash(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
                 ),
               ),
             ],

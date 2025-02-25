@@ -36,6 +36,8 @@ flutter:
   assets:
     - assets/background1.jpg
     - assets/bg_music.mp3
+    - assets/mute.png
+    - assets/unmute.png
     - assets/alphabet.png
     - assets/logo.mp4
     - assets/word_puzzle/success.mp3
