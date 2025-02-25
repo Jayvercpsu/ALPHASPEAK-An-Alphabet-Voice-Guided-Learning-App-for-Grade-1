@@ -1,274 +1,217 @@
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'dart:math';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'easy_word_puzzle.dart';
+import 'medium_word_puzzle.dart';
+import 'hard_word_puzzle.dart';
 
 class WordPuzzleScreen extends StatefulWidget {
   final AudioPlayer audioPlayer;
-
-  WordPuzzleScreen({required this.audioPlayer});
+  const WordPuzzleScreen({Key? key, required this.audioPlayer}) : super(key: key);
 
   @override
   _WordPuzzleScreenState createState() => _WordPuzzleScreenState();
 }
 
-class _WordPuzzleScreenState extends State<WordPuzzleScreen> {
+class _WordPuzzleScreenState extends State<WordPuzzleScreen> with SingleTickerProviderStateMixin {
   final FlutterTts _flutterTts = FlutterTts();
   String _selectedDifficulty = 'Easy';
-  final Map<String, List<String>> _wordsByDifficulty = {
-    'Easy': ['CAT', 'DOG', 'HAT'],
-    'Medium': ['HOME', 'GAME', 'WORD', 'BOOK'],
-    'Hard': ['PUZZLE', 'WIDGET', 'FLUTTER', 'BUTTON', 'MOBILE', 'SCREEN'],
-  };
-
-  late String _targetWord;
-  late List<String> _scrambledLetters;
-  List<String> _userWordLetters = [];
-  List<Color> _slotColors = [];
-  bool _loading = true;
-  bool _hasPlayedSuccess = false;
+  int _easyScore = 0;
+  int _mediumScore = 0;
+  int _hardScore = 0;
+  bool _isLoading = true;
+  late AnimationController _animationController;
+  late Animation<Offset> _slideAnimation;
 
   @override
   void initState() {
     super.initState();
-    widget.audioPlayer.stop();
-    _initializePuzzle();
-    _simulateLoading();
-    _playTutorial();
+    _startLoading();
+    _loadScores();
+
+    _animationController = AnimationController(vsync: this, duration: Duration(milliseconds: 800));
+    _slideAnimation = Tween<Offset>(begin: Offset(0, 1), end: Offset(0, 0)).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
   }
 
-  Future<void> _simulateLoading() async {
+  void _startLoading() async {
     await Future.delayed(Duration(seconds: 1));
     setState(() {
-      _loading = false;
+      _isLoading = false;
     });
+    _animationController.forward();
   }
 
-  void _initializePuzzle() {
-    final words = _wordsByDifficulty[_selectedDifficulty]!;
-    final randomIndex = Random().nextInt(words.length);
-    _targetWord = words[randomIndex];
-    _scrambledLetters = _targetWord.split('')..shuffle();
-    _userWordLetters = List.filled(_targetWord.length, '');
-    _slotColors = List.filled(_targetWord.length, Colors.grey);
-    _hasPlayedSuccess = false;
-  }
-
-  Future<void> _playAudio(String path) async {
-    try {
-      await widget.audioPlayer.stop(); // Stop any currently playing sound
-      await widget.audioPlayer.seek(Duration.zero); // Reset position
-      await widget.audioPlayer.setSource(AssetSource(path));
-      await widget.audioPlayer.resume();
-    } catch (e) {
-      print("Error playing audio: $e");
-    }
-  }
-
-
-  Future<void> _playTutorial() async {
-    await _flutterTts.setLanguage("en-US");
-    await _flutterTts.setSpeechRate(0.5);
-    await _flutterTts.speak("Welcome to the Word Puzzle Game! Drag and drop the letters into the correct boxes to form a word.");
-  }
-
-  bool _isPuzzleComplete() {
-    if (!_userWordLetters.contains('')) { // Only check when all slots are filled
-      return _userWordLetters.join('') == _targetWord;
-    }
-    return false;
-  }
-
-
-
-  Future<void> _provideEncouragement() async {
-    int placedLetters = _userWordLetters.where((letter) => letter.isNotEmpty).length;
-    if (placedLetters == _targetWord.length - 1) {
-      await _flutterTts.speak("Almost done!");
-    } else {
-      await _flutterTts.speak("Nice!");
-    }
-  }
-
-  Future<void> _showCompletionDialog() async {
-    if (_hasPlayedSuccess) return; // Exit if already played
-
-    _hasPlayedSuccess = true; // Set flag to prevent multiple plays
-
-    await _playAudio('word_puzzle/success.mp3'); // Play success sound
-    await Future.delayed(Duration(milliseconds: 500)); // Ensure TTS doesn't overlap
-
-    await _flutterTts.speak("Awesome! You solved it! Let's do another!");
-
-    await Future.delayed(Duration(seconds: 2));
-
+  Future<void> _loadScores() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      _initializePuzzle();
+      _easyScore = prefs.getInt('easy_score') ?? 0;
+      _mediumScore = prefs.getInt('medium_score') ?? 0;
+      _hardScore = prefs.getInt('hard_score') ?? 0;
+    });
+  }
+
+  int getTotalScore() {
+    return _easyScore + _mediumScore + _hardScore;
+  }
+
+  void _startGame(String difficulty) {
+    setState(() {
+      _selectedDifficulty = difficulty;
     });
 
-    _hasPlayedSuccess = false; // Reset for next word
+    Widget screen;
+    switch (difficulty) {
+      case 'Easy':
+        screen = EasyWordPuzzleScreen(audioPlayer: widget.audioPlayer, updateScore: _updateScore);
+        break;
+      case 'Medium':
+        screen = MediumWordPuzzleScreen(audioPlayer: widget.audioPlayer, updateScore: _updateScore);
+        break;
+      case 'Hard':
+        screen = HardWordPuzzleScreen(audioPlayer: widget.audioPlayer, updateScore: _updateScore);
+        break;
+      default:
+        screen = EasyWordPuzzleScreen(audioPlayer: widget.audioPlayer, updateScore: _updateScore);
+    }
+
+    Navigator.push(context, MaterialPageRoute(builder: (_) => screen)).then((_) => _loadScores());
+  }
+
+  void _updateScore(int points) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      if (_selectedDifficulty == 'Easy') {
+        _easyScore += points;
+        prefs.setInt('easy_score', _easyScore);
+      } else if (_selectedDifficulty == 'Medium') {
+        _mediumScore += points;
+        prefs.setInt('medium_score', _mediumScore);
+      } else if (_selectedDifficulty == 'Hard') {
+        _hardScore += points;
+        prefs.setInt('hard_score', _hardScore);
+      }
+    });
+  }
+
+  void _resetScores() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _easyScore = 0;
+      _mediumScore = 0;
+      _hardScore = 0;
+    });
+
+    prefs.setInt('easy_score', 0);
+    prefs.setInt('medium_score', 0);
+    prefs.setInt('hard_score', 0);
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    double screenHeight = MediaQuery.of(context).size.height;
+    double screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Word Puzzle', style: TextStyle(color: Colors.white)),
-        centerTitle: true,
-        backgroundColor: Colors.blueAccent,
-        elevation: 0,
+        title: Text('Word Puzzle 🎯', style: GoogleFonts.berkshireSwash(fontSize: 28, color: Colors.white)),
+        backgroundColor: Colors.pinkAccent,
+        iconTheme: IconThemeData(color: Colors.white),
+        actions: [
+          IconButton(icon: Icon(Icons.refresh), onPressed: _resetScores),
+        ],
       ),
-      body: _loading ? _buildLoadingScreen() : _buildMainScreen(),
-    );
-  }
-
-  Widget _buildLoadingScreen() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+      body: Stack(
         children: [
-          CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Colors.blueAccent)),
-          SizedBox(height: 20),
-          Text(
-            'Loading Puzzle...',
-            style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.black),
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                image: DecorationImage(image: AssetImage('assets/background1.jpg'), fit: BoxFit.cover),
+              ),
+              child: Container(color: Colors.black.withOpacity(0.2)),
+            ),
           ),
+
+          if (_isLoading)
+            Center(child: CircularProgressIndicator(color: Colors.pinkAccent))
+          else
+            SlideTransition(
+              position: _slideAnimation,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "Choose Difficulty",
+                    style: GoogleFonts.berkshireSwash(fontSize: screenHeight * 0.035, fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
+                  SizedBox(height: screenHeight * 0.02),
+                  _buildDifficultyButton("Easy", Colors.greenAccent, screenWidth),
+                  _buildDifficultyButton("Medium", Colors.orangeAccent, screenWidth),
+                  _buildDifficultyButton("Hard", Colors.redAccent, screenWidth),
+                  SizedBox(height: screenHeight * 0.05),
+                  _buildScoreBox(screenHeight, screenWidth),
+                ],
+              ),
+            ),
         ],
       ),
     );
   }
 
-  Widget _buildMainScreen() {
-    return Stack(
-      children: [
-        Container(
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/background1.jpg'),
-              fit: BoxFit.cover,
-            ),
+  Widget _buildDifficultyButton(String level, Color color, double screenWidth) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 8),
+      child: SizedBox(
+        width: screenWidth * 0.8,
+        child: ElevatedButton(
+          onPressed: () => _startGame(level),
+          style: ElevatedButton.styleFrom(
+            padding: EdgeInsets.symmetric(vertical: 15),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            backgroundColor: color,
+            elevation: 5,
+          ),
+          child: Text(
+            level,
+            style: GoogleFonts.berkshireSwash(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
           ),
         ),
-        Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: ['Easy', 'Medium', 'Hard'].map((difficulty) {
-                  return ElevatedButton(
-                    onPressed: () => setState(() {
-                      _selectedDifficulty = difficulty;
-                      _initializePuzzle();
-                      _playTutorial();
-                    }),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _selectedDifficulty == difficulty ? Colors.blue : Colors.grey,
-                    ),
-                    child: Text(
-                      difficulty,
-                      style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
-            _buildWordSlots(),
-            SizedBox(height: 20),
-            Wrap(
-              spacing: 10,
-              runSpacing: 10,
-              children: _scrambledLetters.map((letter) {
-                return Draggable<String>(
-                  data: letter,
-                  child: _buildLetterTile(letter, false),
-                  feedback: _buildLetterTile(letter, true),
-                  childWhenDragging: _buildLetterTile(letter, false, faded: true),
-                );
-              }).toList(),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  _initializePuzzle();
-                });
-              },
-              child: Text("Reset Puzzle"),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            ),
-          ],
-        ),
-      ],
+      ),
     );
   }
 
-  Widget _buildLetterTile(String letter, bool isFeedback, {bool faded = false}) {
+  Widget _buildScoreBox(double screenHeight, double screenWidth) {
     return Container(
-      width: 60,
-      height: 70,
+      padding: EdgeInsets.all(screenHeight * 0.02),
+      margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+      width: screenWidth * 0.9,
       decoration: BoxDecoration(
-        color: isFeedback ? Colors.blue.withOpacity(0.8) : faded ? Colors.grey[400] : Colors.blue,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.black, width: 2),
+        color: Colors.white.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 10, spreadRadius: 2, offset: Offset(2, 2))],
       ),
-      alignment: Alignment.center,
-      child: Text(
-        letter,
-        style: TextStyle(
-          fontSize: 36,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-        ),
+      child: Column(
+        children: [
+          Text(
+            "Total Score: ${getTotalScore()}",
+            style: GoogleFonts.berkshireSwash(fontSize: screenHeight * 0.03, fontWeight: FontWeight.bold, color: Colors.blueAccent),
+          ),
+          SizedBox(height: screenHeight * 0.01),
+          Text(
+            "Easy: $_easyScore | Medium: $_mediumScore | Hard: $_hardScore",
+            style: GoogleFonts.berkshireSwash(fontSize: screenHeight * 0.025, color: Colors.black),
+          ),
+        ],
       ),
-    );
-  }
-
-  Widget _buildWordSlots() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(_targetWord.length, (index) {
-        return DragTarget<String>(
-          builder: (context, candidateData, rejectedData) {
-            return Container(
-              margin: EdgeInsets.symmetric(horizontal: 5),
-              width: 65,
-              height: 75,
-              padding: EdgeInsets.all(5),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: _slotColors[index], width: 3),
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                _userWordLetters[index].isNotEmpty ? _userWordLetters[index] : '',
-                style: TextStyle(
-                  fontSize: 38,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-            );
-          },
-          onAccept: (letter) async {
-            setState(() {
-              if (letter == _targetWord[index]) {
-                _userWordLetters[index] = letter;
-                _scrambledLetters.remove(letter);
-                _slotColors[index] = Colors.green;
-              }
-            });
-
-            await _provideEncouragement();
-
-            if (_isPuzzleComplete()) {
-              _showCompletionDialog();
-            }
-          },
-        );
-      }),
     );
   }
 }
