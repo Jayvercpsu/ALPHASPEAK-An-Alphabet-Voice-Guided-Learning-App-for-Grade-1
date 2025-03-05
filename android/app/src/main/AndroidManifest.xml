@@ -26,7 +26,7 @@
     <application
         android:hardwareAccelerated="true"
         android:usesCleartextTraffic="true"
-        android:label="Learn Alphabet"
+        android:label="AlphaSpeak"
         android:name="${applicationName}"
         android:icon="@drawable/alphabet">
 

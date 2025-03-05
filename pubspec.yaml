@@ -82,4 +82,6 @@ flutter:
     - assets/alphabet-sounds/correct.mp3
     - assets/alphabet-sounds/tap.mp3
     - assets/all-letters/
+    - assets/cpsu-logo.png
+    - assets/client-logo.png
 

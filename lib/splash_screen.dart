@@ -15,7 +15,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _navigateToHome() async {
-    await Future.delayed(Duration(seconds: 3));
+    await Future.delayed(Duration(seconds: 5));
     if (mounted) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => MainScreen()),
@@ -30,6 +30,7 @@ class _SplashScreenState extends State<SplashScreen> {
         width: double.infinity,
         height: double.infinity,
         color: Colors.white,
+        padding: EdgeInsets.all(5), // Global margin
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -39,18 +40,39 @@ class _SplashScreenState extends State<SplashScreen> {
               height: 200,
               fit: BoxFit.contain,
             ),
-            SizedBox(height: 30),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              child: Text(
-                'Loading...',
-                style: GoogleFonts.berkshireSwash(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.blue.shade900,
-                ),
+            SizedBox(height: 20),
+            Text(
+              'In Partnership with',
+              style: GoogleFonts.poppins(
+                fontSize: 18,
+                color: Colors.black,
               ),
+              textAlign: TextAlign.center,
             ),
+            SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset(
+                  'assets/cpsu-logo.png',
+                  width: 80,
+                  height: 80,
+                  fit: BoxFit.contain,
+                ),
+                SizedBox(width: 20),
+                Image.asset(
+                  'assets/client-logo.png',
+                  width: 80,
+                  height: 80,
+                  fit: BoxFit.contain,
+                ),
+              ],
+            ),
+            SizedBox(height: 20),
+            CircularProgressIndicator(
+              color: Colors.blue.shade900,
+            ),
+            SizedBox(height: 20),
           ],
         ),
       ),
