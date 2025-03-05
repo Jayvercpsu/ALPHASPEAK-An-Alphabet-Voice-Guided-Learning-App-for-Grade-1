@@ -6,12 +6,14 @@ import 'all_alphabet/alphabet/main_alphabet.dart';
 import 'rhyming_words/matching_letters.dart';
 import 'check_pronunciation/check_pronunciation.dart';
 import 'word_puzzle/word_puzzle.dart';
-import 'fill_words/fill_words.dart';
+import 'stories/stories_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final AudioPlayer audioPlayer;
 
   const HomeScreen({Key? key, required this.audioPlayer}) : super(key: key);
+
+  final double imageSize = 150;
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -84,7 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   alignment: Alignment.topRight,
                   child: IconButton(
                     icon: Image.asset(
-                      _isMuted ? 'assets/mute.png' : 'assets/unmute.png',
+                      _isMuted ? 'assets/unmute.png' : 'assets/mute.png',
                       width: 40,
                       height: 40,
                     ),
@@ -185,6 +187,21 @@ class _HomeScreenState extends State<HomeScreen> {
                                     text: "Word Puzzle",
                                     imagePath: 'assets/home-screen/puzzle.png',
                                     screen: WordPuzzleScreen(audioPlayer: widget.audioPlayer),
+                                  ),
+                                ],
+                                buttonWidth,
+                                buttonHeight,
+                                slideFromLeft: false,
+                                delayMilliseconds: 200,
+                              ),
+                              SizedBox(height: 40),
+                              _buildFeatureRow(
+                                context,
+                                [
+                                  _FeatureItem(
+                                    text: "Stories",
+                                    imagePath: 'assets/home-screen/stories.png',
+                                    screen: StoriesScreen(audioPlayer: widget.audioPlayer),
                                   ),
                                 ],
                                 buttonWidth,

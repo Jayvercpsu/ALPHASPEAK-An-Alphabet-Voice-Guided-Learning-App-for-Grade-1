@@ -75,7 +75,7 @@ flutter:
     - assets/home-screen/matching.png
     - assets/home-screen/voice.png
     - assets/home-screen/puzzle.png
-    - assets/home-screen/fill_in.png
+    - assets/home-screen/stories.png
     - assets/board.png
     - assets/alphabet-sounds/
     - assets/alphabet-sounds/wrong.mp3
@@ -84,4 +84,6 @@ flutter:
     - assets/all-letters/
     - assets/cpsu-logo.png
     - assets/client-logo.png
+    - assets/stories/ben_ted.jpg
+    - assets/stories/the_zoo.jpg
 
