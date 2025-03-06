@@ -16,11 +16,31 @@ class MainAlphabet extends StatefulWidget {
 
 class _MainAlphabetState extends State<MainAlphabet> with TickerProviderStateMixin {
   bool _isLoading = true;
+  late AnimationController _animationController;
+  late Animation<Offset> _slideAnimation;
 
   @override
   void initState() {
+    _initializeAnimation(); // Initialize animation first
     super.initState();
     _startLoading();
+  }
+
+  void _initializeAnimation() {
+    _animationController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 800),
+    );
+
+    _slideAnimation = Tween<Offset>(
+      begin: Offset(0.0, 1.0), // Start from bottom
+      end: Offset.zero,        // End at center
+    ).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeInOut,
+      ),
+    );
   }
 
   void _startLoading() async {
@@ -28,12 +48,11 @@ class _MainAlphabetState extends State<MainAlphabet> with TickerProviderStateMix
     setState(() {
       _isLoading = false;
     });
+    _animationController.forward(); // Start the animation after loading
   }
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
-
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -45,15 +64,12 @@ class _MainAlphabetState extends State<MainAlphabet> with TickerProviderStateMix
       ),
       body: Stack(
         children: [
-          // Background Image
           Positioned.fill(
             child: Image.asset(
               'assets/background1.jpg',
               fit: BoxFit.cover,
             ),
           ),
-
-          // Animated Fade-in Loading Screen
           AnimatedSwitcher(
             duration: Duration(milliseconds: 500),
             child: _isLoading
@@ -68,20 +84,21 @@ class _MainAlphabetState extends State<MainAlphabet> with TickerProviderStateMix
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _interactiveCategoryButton(
-                      context,
-                      'All Letters',
-                      Icons.menu_book_rounded, // 📖 Book icon for all letters
-                      Colors.pinkAccent,
-                      AlphabetScreen(audioPlayer: widget.audioPlayer),
+                    SlideTransition(
+                      position: _slideAnimation,
+                      child: _interactiveCategoryButton(
+                        context,
+                        'All Letters',
+                        Icons.menu_book_rounded,
+                        Colors.pinkAccent,
+                        AlphabetScreen(audioPlayer: widget.audioPlayer),
+                      ),
                     ),
-
                   ],
                 ),
               ),
             ),
           ),
-
         ],
       ),
     );
@@ -90,7 +107,12 @@ class _MainAlphabetState extends State<MainAlphabet> with TickerProviderStateMix
   Widget _interactiveCategoryButton(
       BuildContext context, String title, IconData icon, Color color, Widget screen) {
     return GestureDetector(
-      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => screen)),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => screen),
+        );
+      },
       child: AnimatedContainer(
         duration: Duration(milliseconds: 300),
         curve: Curves.easeOut,
@@ -132,7 +154,9 @@ class _MainAlphabetState extends State<MainAlphabet> with TickerProviderStateMix
     );
   }
 
-
-
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
-
+}

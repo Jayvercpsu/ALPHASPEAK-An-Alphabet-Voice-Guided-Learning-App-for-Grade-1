@@ -188,7 +188,7 @@ class _AlphabetScreenState extends State<AlphabetScreen> {
               SizedBox(height: 20),
               Text(
                 _examples.values.elementAt(_currentIndex),
-                style: GoogleFonts.berkshireSwash(fontSize: 30, color: Colors.white),
+                style: GoogleFonts.berkshireSwash(fontSize: 60, color: Colors.white),
               ),
             ],
           ),
