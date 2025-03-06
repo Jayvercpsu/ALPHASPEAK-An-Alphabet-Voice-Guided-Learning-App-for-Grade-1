@@ -276,6 +276,8 @@ class _BenTedScreenState extends State<BenTedScreen> with SingleTickerProviderSt
     );
   }
 
+  bool _isPlaying = false; // Track TTS state
+
   Widget _buildStory() {
     return Container(
       padding: EdgeInsets.all(10),
@@ -283,19 +285,89 @@ class _BenTedScreenState extends State<BenTedScreen> with SingleTickerProviderSt
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.9),
         borderRadius: BorderRadius.circular(12),
+        boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 10)],
       ),
       child: Column(
         children: [
           Image.asset('assets/stories/ben_ted.jpg'),
+          SizedBox(height: 10),
           Text(
             "Ted has a red tent. He is in the tent. Ben is in the tent too. 10 hens ran into the tent. The tent fell on Ben, Ted, and the ten hens. Ben and Ted yell for help.",
             textAlign: TextAlign.center,
             style: GoogleFonts.poppins(fontSize: 18, color: Colors.black),
           ),
+          SizedBox(height: 20),
+
+          // TTS Buttons Row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Column(
+                children: [
+                  IconButton(
+                    onPressed: () async {
+                      if (_isPlaying) {
+                        await _flutterTts.pause();
+                        setState(() {
+                          _isPlaying = false;
+                        });
+                      } else {
+                        await _flutterTts.speak(
+                          "Ted has a red tent. He is in the tent. Ben is in the tent too. 10 hens ran into the tent. The tent fell on Ben, Ted, and the ten hens. Ben and Ted yell for help.",
+                        );
+                        setState(() {
+                          _isPlaying = true;
+                        });
+                      }
+                    },
+                    icon: Icon(
+                      _isPlaying ? Icons.pause : Icons.play_arrow,
+                      color: _isPlaying ? Colors.orange : Colors.green,
+                      size: 32,
+                    ),
+                    tooltip: _isPlaying ? 'Pause' : 'Play',
+                  ),
+                  Text(
+                    _isPlaying ? "Pause" : "Play",
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      color: Colors.black,
+                    ),
+                  ),
+                ],
+              ),
+              Column(
+                children: [
+                  IconButton(
+                    onPressed: () async {
+                      await _flutterTts.stop();
+                      setState(() {
+                        _isPlaying = false;
+                      });
+                    },
+                    icon: Icon(
+                      Icons.stop,
+                      color: Colors.red,
+                      size: 32,
+                    ),
+                    tooltip: 'Stop',
+                  ),
+                  Text(
+                    "Stop",
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      color: Colors.black,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ],
       ),
     );
   }
+
 
   Widget _buildQuestions() {
     List<String> questions = [
