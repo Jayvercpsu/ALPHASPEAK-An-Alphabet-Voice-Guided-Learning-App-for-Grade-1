@@ -45,6 +45,7 @@ class _EasyWordPuzzleScreenState extends State<EasyWordPuzzleScreen> with Single
     _initializeTTS();
     _loadScore();
 
+
     _animationController = AnimationController(vsync: this, duration: Duration(milliseconds: 800));
   }
 
@@ -62,13 +63,17 @@ class _EasyWordPuzzleScreenState extends State<EasyWordPuzzleScreen> with Single
     _flutterTts.setSpeechRate(0.5);
   }
 
+  List<bool?> _isCorrect = [];
+
   void _initializePuzzle() async {
     setState(() {
       _targetWord = (_words..shuffle()).first;
       _scrambledLetters = _targetWord.split('')..shuffle();
       _userWordLetters = List.filled(_targetWord.length, '');
       _slotColors = List.filled(_targetWord.length, Colors.grey);
+      _isCorrect = List.filled(_targetWord.length, null); // Initialize _isCorrect
     });
+
 
     await _flutterTts.speak("Arrange the letters for $_targetWord");
   }
@@ -210,43 +215,55 @@ class _EasyWordPuzzleScreenState extends State<EasyWordPuzzleScreen> with Single
               width: 65,
               height: 75,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: _isCorrect[index] == true ? Colors.blue.withOpacity(0.8) : Colors.white, // Blue background with transparency
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: _slotColors[index], width: 3),
+                border: Border.all(
+                  color: _isCorrect[index] == true ? Colors.blue : _slotColors[index], // Blue border if correct
+                  width: 3,
+                ),
               ),
               alignment: Alignment.center,
               child: Text(
-                _userWordLetters[index].isNotEmpty ? _userWordLetters[index] : _targetWord[index],
-                style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: Colors.black12),
+                _userWordLetters[index].isNotEmpty ? _userWordLetters[index] : _targetWord[index], // Show outline letter always
+                style: TextStyle(
+                  fontSize: 36,
+                  fontWeight: FontWeight.bold,
+                  color: _userWordLetters[index].isNotEmpty ? Colors.white : Colors.black12, // White if answered, black outline if not
+                ),
               ),
             );
           },
-          onAccept: (letter) async {
-            setState(() {
-              if (letter == _targetWord[index]) {
-                _userWordLetters[index] = letter;
-                _scrambledLetters.remove(letter);
-                _slotColors[index] = Colors.green;
-                _score += 10;
-                _saveScore();
-                _playSound('word_puzzle/drop.mp3');
-              } else {
-                _slotColors[index] = Colors.red;
-                _playSound('alphabet-sounds/wrong.mp3');
-              }
-            });
-
-            if (_isPuzzleComplete()) {
-              _confettiController.play();
-              Future.delayed(Duration(seconds: 2), () {
-                _initializePuzzle();
+            onAccept: (letter) async {
+              setState(() {
+                if (letter == _targetWord[index]) {
+                  _userWordLetters[index] = letter;
+                  _scrambledLetters.remove(letter);
+                  _slotColors[index] = Colors.blue; // Blue background for correct answers
+                  _isCorrect[index] = true; // Mark correct
+                  _playSound('word_puzzle/drop.mp3'); // Drop Sound for correct letters
+                } else {
+                  _slotColors[index] = Colors.red; // Red background for wrong answers
+                  _isCorrect[index] = false; // Mark wrong
+                  _playSound('alphabet-sounds/wrong.mp3'); // Wrong Sound
+                }
               });
-            }
-          },
+
+              if (_isPuzzleComplete()) {
+                _confettiController.play();
+                _score += 1; // ✅ Add 1 point when the puzzle is fully completed
+                _saveScore(); // Save Score after complete puzzle
+                await _playSound('stories/sound/win.mp3'); // Play Win Sound at the end
+                Future.delayed(Duration(seconds: 2), () {
+                  _initializePuzzle(); // Reset Puzzle
+                });
+              }
+            },
         );
       }),
     );
   }
+
+
 
   Widget _buildResetButton() {
     return ElevatedButton(

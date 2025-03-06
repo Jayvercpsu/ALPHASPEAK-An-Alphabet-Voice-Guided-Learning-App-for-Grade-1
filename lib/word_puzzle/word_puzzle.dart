@@ -59,6 +59,14 @@ class _WordPuzzleScreenState extends State<WordPuzzleScreen> with SingleTickerPr
     return _easyScore + _mediumScore + _hardScore;
   }
 
+  final AudioPlayer _tapPlayer = AudioPlayer();
+
+  Future<void> _playTapSound() async {
+    await _tapPlayer.stop(); // Stop any previous sound
+    await _tapPlayer.play(AssetSource('alphabet-sounds/tap.mp3')); // Play Tap Sound
+  }
+
+
   void _startGame(String difficulty) {
     setState(() {
       _selectedDifficulty = difficulty;
@@ -111,62 +119,64 @@ class _WordPuzzleScreenState extends State<WordPuzzleScreen> with SingleTickerPr
     prefs.setInt('hard_score', 0);
   }
 
+
   @override
   void dispose() {
+    _tapPlayer.dispose(); // Dispose Tap Sound Player
     _animationController.dispose();
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    double screenHeight = MediaQuery.of(context).size.height;
-    double screenWidth = MediaQuery.of(context).size.width;
+    @override
+    Widget build(BuildContext context) {
+      double screenHeight = MediaQuery.of(context).size.height;
+      double screenWidth = MediaQuery.of(context).size.width;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Word Puzzle 🎯', style: GoogleFonts.berkshireSwash(fontSize: 28, color: Colors.white)),
-        backgroundColor: Colors.pinkAccent,
-        iconTheme: IconThemeData(color: Colors.white),
-        actions: [
-          IconButton(icon: Icon(Icons.refresh), onPressed: _resetScores),
-        ],
-      ),
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: Container(
-              decoration: BoxDecoration(
-                image: DecorationImage(image: AssetImage('assets/background1.jpg'), fit: BoxFit.cover),
-              ),
-              child: Container(color: Colors.black.withOpacity(0.2)),
-            ),
-          ),
-
-          if (_isLoading)
-            Center(child: CircularProgressIndicator(color: Colors.pinkAccent))
-          else
-            SlideTransition(
-              position: _slideAnimation,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    "Choose Difficulty",
-                    style: GoogleFonts.berkshireSwash(fontSize: screenHeight * 0.035, fontWeight: FontWeight.bold, color: Colors.white),
-                  ),
-                  SizedBox(height: screenHeight * 0.02),
-                  _buildDifficultyButton("Easy", Colors.greenAccent, screenWidth),
-                  _buildDifficultyButton("Medium", Colors.orangeAccent, screenWidth),
-                  _buildDifficultyButton("Hard", Colors.redAccent, screenWidth),
-                  SizedBox(height: screenHeight * 0.05),
-                  _buildScoreBox(screenHeight, screenWidth),
-                ],
+      return Scaffold(
+        appBar: AppBar(
+          title: Text('Word Puzzle 🎯', style: GoogleFonts.berkshireSwash(fontSize: 28, color: Colors.white)),
+          backgroundColor: Colors.pinkAccent,
+          iconTheme: IconThemeData(color: Colors.white),
+          actions: [
+            IconButton(icon: Icon(Icons.refresh), onPressed: _resetScores),
+          ],
+        ),
+        body: Stack(
+          children: [
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  image: DecorationImage(image: AssetImage('assets/background1.jpg'), fit: BoxFit.cover),
+                ),
+                child: Container(color: Colors.black.withOpacity(0.2)),
               ),
             ),
-        ],
-      ),
-    );
-  }
+
+            if (_isLoading)
+              Center(child: CircularProgressIndicator(color: Colors.pinkAccent))
+            else
+              SlideTransition(
+                position: _slideAnimation,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Choose Difficulty",
+                      style: GoogleFonts.berkshireSwash(fontSize: screenHeight * 0.035, fontWeight: FontWeight.bold, color: Colors.white),
+                    ),
+                    SizedBox(height: screenHeight * 0.02),
+                    _buildDifficultyButton("Easy", Colors.greenAccent, screenWidth),
+                    _buildDifficultyButton("Medium", Colors.orangeAccent, screenWidth),
+                    _buildDifficultyButton("Hard", Colors.redAccent, screenWidth),
+                    SizedBox(height: screenHeight * 0.05),
+                    _buildScoreBox(screenHeight, screenWidth),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      );
+    }
 
   Widget _buildDifficultyButton(String level, Color color, double screenWidth) {
     return Padding(
@@ -174,7 +184,10 @@ class _WordPuzzleScreenState extends State<WordPuzzleScreen> with SingleTickerPr
       child: SizedBox(
         width: screenWidth * 0.8,
         child: ElevatedButton(
-          onPressed: () => _startGame(level),
+          onPressed: () async {
+            await _playTapSound(); // Play Tap Sound when clicked
+            _startGame(level);
+          },
           style: ElevatedButton.styleFrom(
             padding: EdgeInsets.symmetric(vertical: 15),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -183,7 +196,11 @@ class _WordPuzzleScreenState extends State<WordPuzzleScreen> with SingleTickerPr
           ),
           child: Text(
             level,
-            style: GoogleFonts.berkshireSwash(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
+            style: GoogleFonts.berkshireSwash(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
           ),
         ),
       ),

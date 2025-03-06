@@ -52,8 +52,14 @@ class _StoriesScreenState extends State<StoriesScreen> with SingleTickerProvider
 
   @override
   Widget build(BuildContext context) {
-    double screenHeight = MediaQuery.of(context).size.height;
-    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery
+        .of(context)
+        .size
+        .height;
+    double screenWidth = MediaQuery
+        .of(context)
+        .size
+        .width;
 
     return Scaffold(
       appBar: AppBar(
@@ -122,6 +128,8 @@ class _StoriesScreenState extends State<StoriesScreen> with SingleTickerProvider
     );
   }
 
+  AudioPlayer _tapSound = AudioPlayer(); // Add Audio Player for tap sound
+
   Widget _buildStoryCard({
     required String imagePath,
     required String title,
@@ -130,7 +138,9 @@ class _StoriesScreenState extends State<StoriesScreen> with SingleTickerProvider
     required double screenWidth,
   }) {
     return GestureDetector(
-      onTap: () {
+      onTap: () async {
+        await _tapSound.play(
+            AssetSource('alphabet-sounds/tap.mp3')); // Play tap sound
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => screen),
@@ -164,7 +174,7 @@ class _StoriesScreenState extends State<StoriesScreen> with SingleTickerProvider
               style: GoogleFonts.berkshireSwash(
                 fontSize: screenHeight * 0.03,
                 fontWeight: FontWeight.bold,
-                color: Colors.blueAccent,
+                color: Colors.black,
               ),
               textAlign: TextAlign.center,
             ),

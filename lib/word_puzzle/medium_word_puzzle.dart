@@ -64,13 +64,9 @@ class _MediumWordPuzzleScreenState extends State<MediumWordPuzzleScreen> with Si
     _flutterTts.setSpeechRate(0.5);
   }
 
+  List<bool?> _isCorrect = [];
+
   void _initializePuzzle() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    await Future.delayed(Duration(milliseconds: 500));
-
     setState(() {
       _targetWord = (_words..shuffle()).first;
       _scrambledLetters = _targetWord.split('')..shuffle();
@@ -78,6 +74,10 @@ class _MediumWordPuzzleScreenState extends State<MediumWordPuzzleScreen> with Si
       _slotColors = List.filled(_targetWord.length, Colors.grey);
       _isLoading = false;
     });
+
+    await Future.delayed(Duration(milliseconds: 500));
+
+
 
     await _flutterTts.speak("Arrange the letters for $_targetWord");
   }
@@ -214,14 +214,20 @@ class _MediumWordPuzzleScreenState extends State<MediumWordPuzzleScreen> with Si
               width: 65,
               height: 75,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: _userWordLetters[index].isNotEmpty && _userWordLetters[index] == _targetWord[index]
+                    ? Colors.blue // Blue Background for Correct Letter
+                    : Colors.white, // White for Empty or Incorrect
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(color: _slotColors[index], width: 3),
               ),
               alignment: Alignment.center,
               child: Text(
                 _userWordLetters[index].isNotEmpty ? _userWordLetters[index] : _targetWord[index],
-                style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: Colors.black12),
+                style: TextStyle(
+                  fontSize: 36,
+                  fontWeight: FontWeight.bold,
+                  color: _userWordLetters[index].isNotEmpty ? Colors.white : Colors.black12, // Show Outline Letter
+                ),
               ),
             );
           },
@@ -230,20 +236,26 @@ class _MediumWordPuzzleScreenState extends State<MediumWordPuzzleScreen> with Si
               if (letter == _targetWord[index]) {
                 _userWordLetters[index] = letter;
                 _scrambledLetters.remove(letter);
-                _slotColors[index] = Colors.green;
-                _score += 10;
-                _saveScore();
-                _playSound('word_puzzle/drop.mp3');
+                _slotColors[index] = Colors.blue; // Blue Background for Correct
+                _playSound('word_puzzle/drop.mp3'); // Drop Sound
               } else {
-                _slotColors[index] = Colors.red;
-                _playSound('alphabet-sounds/wrong.mp3');
+                _slotColors[index] = Colors.red; // Red Background for Wrong
+                _playSound('alphabet-sounds/wrong.mp3'); // Wrong Sound
               }
             });
 
+            // ✅ Add Score Only After Completing the Puzzle
             if (_isPuzzleComplete()) {
-              _confettiController.play();
+              _confettiController.play(); // Confetti Explosion
+              await _playSound('stories/sound/win.mp3'); // Win Sound
+
+              setState(() {
+                _score += 1; // Add Score Once Only
+                _saveScore(); // Save Score to SharedPreferences
+              });
+
               Future.delayed(Duration(seconds: 2), () {
-                _initializePuzzle();
+                _initializePuzzle(); // Reset Puzzle
               });
             }
           },
@@ -251,6 +263,7 @@ class _MediumWordPuzzleScreenState extends State<MediumWordPuzzleScreen> with Si
       }),
     );
   }
+
 
   Widget _buildScrambledLetters() {
     return Wrap(
@@ -273,7 +286,7 @@ class _MediumWordPuzzleScreenState extends State<MediumWordPuzzleScreen> with Si
       width: 60,
       height: 70,
       decoration: BoxDecoration(
-        color: isDragging ? Colors.pinkAccent.withOpacity(0.8) : isFaded ? Colors.grey[400] : Colors.pinkAccent,
+        color: isDragging ? Colors.blueAccent.withOpacity(0.8) : isFaded ? Colors.grey[400] : Colors.blueAccent,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: Colors.black, width: 2),
       ),

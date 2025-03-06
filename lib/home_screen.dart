@@ -304,14 +304,17 @@ class _FeatureButtonState extends State<_FeatureButton> {
         offset: _isVisible ? Offset.zero : Offset(widget.slideFromLeft ? -1 : 1, 0),
         child: GestureDetector(
           onTap: () async {
-            await widget.playTapSound();
-            await widget.stopBackgroundMusic();
-            await Navigator.push(context, MaterialPageRoute(builder: (_) => widget.screen));
-            await widget.resumeBackgroundMusic();
+            await widget.playTapSound(); // Play tap sound
+            widget.stopBackgroundMusic(); // Stop background music before navigation
+            await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => widget.screen),
+            );
+            widget.resumeBackgroundMusic(); // Resume background music after navigation
           },
           child: Column(
             children: [
-              Image.asset(widget.imagePath, fit: BoxFit.contain, width: widget.width, height: widget.height),
+              Image.asset(widget.imagePath, width: widget.width, height: widget.height),
               Container(
                 padding: EdgeInsets.symmetric(vertical: 6, horizontal: 10),
                 decoration: BoxDecoration(
@@ -320,7 +323,8 @@ class _FeatureButtonState extends State<_FeatureButton> {
                 ),
                 child: Text(
                   widget.text,
-                  style: GoogleFonts.berkshireSwash(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
+                  style: GoogleFonts.berkshireSwash(
+                      fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
                 ),
               ),
             ],
