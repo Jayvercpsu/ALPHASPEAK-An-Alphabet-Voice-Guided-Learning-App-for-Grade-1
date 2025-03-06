@@ -19,6 +19,7 @@ dependencies:
   video_player_android: ^2.3.3
   animate_do: ^3.3.9
   confetti: ^0.8.0
+  shared_preferences: ^2.5.2
 
 dev_dependencies:
   flutter_test:
@@ -86,4 +87,8 @@ flutter:
     - assets/client-logo.png
     - assets/stories/ben_ted.jpg
     - assets/stories/the_zoo.jpg
+    - assets/stories/trophy.gif
+    - assets/stories/tryagain.gif
+    - assets/stories/sound/gameover.mp3
+    - assets/stories/sound/win.mp3
 

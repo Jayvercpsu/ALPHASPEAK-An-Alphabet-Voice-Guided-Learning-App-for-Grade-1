@@ -16,10 +16,13 @@ class StoriesScreen extends StatefulWidget {
 class _StoriesScreenState extends State<StoriesScreen> with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<Offset> _slideAnimation;
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
+    _startLoading();
+
     _animationController = AnimationController(
       vsync: this,
       duration: Duration(milliseconds: 800),
@@ -31,7 +34,13 @@ class _StoriesScreenState extends State<StoriesScreen> with SingleTickerProvider
     ).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
+  }
 
+  void _startLoading() async {
+    await Future.delayed(Duration(seconds: 1));
+    setState(() {
+      _isLoading = false;
+    });
     _animationController.forward();
   }
 
@@ -68,45 +77,46 @@ class _StoriesScreenState extends State<StoriesScreen> with SingleTickerProvider
               child: Container(color: Colors.black.withOpacity(0.2)),
             ),
           ),
-          SlideTransition(
-            position: _slideAnimation,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(height: screenHeight * 0.05),
-                  Text(
-                    "Choose a Story",
-                    style: GoogleFonts.berkshireSwash(
-                      fontSize: screenHeight * 0.035,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+          if (_isLoading)
+            Center(child: CircularProgressIndicator(color: Colors.pinkAccent))
+          else
+            SlideTransition(
+              position: _slideAnimation,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(height: screenHeight * 0.05),
+                    Text(
+                      "Choose a Story",
+                      style: GoogleFonts.berkshireSwash(
+                        fontSize: screenHeight * 0.035,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: screenHeight * 0.03),
-
-                  _buildStoryCard(
-                    imagePath: 'assets/stories/ben_ted.jpg',
-                    title: "Ben and Ted's Adventure",
-                    screen: BenTedScreen(audioPlayer: widget.audioPlayer),
-                    screenHeight: screenHeight,
-                    screenWidth: screenWidth,
-                  ),
-                  SizedBox(height: screenHeight * 0.03),
-
-                  _buildStoryCard(
-                    imagePath: 'assets/stories/the_zoo.jpg',
-                    title: "The Zoo",
-                    screen: TheZooScreen(audioPlayer: widget.audioPlayer),
-                    screenHeight: screenHeight,
-                    screenWidth: screenWidth,
-                  ),
-                  SizedBox(height: screenHeight * 0.05),
-                ],
+                    SizedBox(height: screenHeight * 0.03),
+                    _buildStoryCard(
+                      imagePath: 'assets/stories/ben_ted.jpg',
+                      title: "Ben and Ted's Adventure",
+                      screen: BenTedScreen(audioPlayer: widget.audioPlayer),
+                      screenHeight: screenHeight,
+                      screenWidth: screenWidth,
+                    ),
+                    SizedBox(height: screenHeight * 0.03),
+                    _buildStoryCard(
+                      imagePath: 'assets/stories/the_zoo.jpg',
+                      title: "The Zoo",
+                      screen: TheZooScreen(audioPlayer: widget.audioPlayer),
+                      screenHeight: screenHeight,
+                      screenWidth: screenWidth,
+                    ),
+                    SizedBox(height: screenHeight * 0.05),
+                  ],
+                ),
               ),
             ),
-          ),
         ],
       ),
     );
