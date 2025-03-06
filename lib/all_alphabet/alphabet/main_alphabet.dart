@@ -72,25 +72,10 @@ class _MainAlphabetState extends State<MainAlphabet> with TickerProviderStateMix
                       context,
                       'All Letters',
                       Icons.menu_book_rounded, // 📖 Book icon for all letters
-                      Colors.blueAccent,
+                      Colors.pinkAccent,
                       AlphabetScreen(audioPlayer: widget.audioPlayer),
                     ),
-                    SizedBox(height: 25),
-                    _interactiveCategoryButton(
-                      context,
-                      'Vowels',
-                      Icons.auto_awesome, // ✨ Alternative icon for vowels
-                      Colors.pinkAccent,
-                      VowelScreen(),
-                    ),
-                    SizedBox(height: 25),
-                    _interactiveCategoryButton(
-                      context,
-                      'Consonants',
-                      Icons.abc, // 🔤 ABC icon for consonants
-                      Colors.deepOrangeAccent,
-                      ConsonantScreen(),
-                    ),
+
                   ],
                 ),
               ),
