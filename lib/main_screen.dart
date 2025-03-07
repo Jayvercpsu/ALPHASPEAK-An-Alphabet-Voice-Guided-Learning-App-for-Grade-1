@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'home_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'dart:ui';
 
 class MainScreen extends StatefulWidget {
   @override
@@ -15,18 +16,19 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   late AnimationController _logoBounceController;
   late AnimationController _textPulseController;
   late AnimationController _buttonController;
+  late AnimationController _bgBlurController;
 
   late Animation<double> _logoBounceAnimation;
   late Animation<double> _textPulseAnimation;
   late Animation<Offset> _buttonOffsetAnimation;
   late Animation<double> _buttonScaleAnimation;
+  late Animation<double> _bgBlurAnimation;
 
   @override
   void initState() {
     super.initState();
     _playBackgroundMusic();
 
-    // ✅ Initialize animation controllers before using them
     _logoBounceController = AnimationController(
       duration: Duration(seconds: 1),
       vsync: this,
@@ -74,9 +76,21 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       curve: Curves.elasticOut,
     ));
 
+    _bgBlurController = AnimationController(
+      duration: Duration(seconds: 3),
+      vsync: this,
+    )..repeat(reverse: true);
+
+    _bgBlurAnimation = Tween<double>(
+      begin: 3,
+      end: 6,
+    ).animate(CurvedAnimation(
+      parent: _bgBlurController,
+      curve: Curves.easeInOut,
+    ));
+
     _startAnimations();
   }
-
 
   Future<void> _startAnimations() async {
     _buttonController.forward();
@@ -98,6 +112,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     _logoBounceController.dispose();
     _textPulseController.dispose();
     _buttonController.dispose();
+    _bgBlurController.dispose();
     super.dispose();
   }
 
@@ -130,129 +145,128 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/background1.jpg'),
-            fit: BoxFit.cover,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Background with Blur Effect
+          AnimatedBuilder(
+            animation: _bgBlurAnimation,
+            builder: (context, child) {
+              return Stack(
+                fit: StackFit.expand,
+                children: [
+                  Image.asset(
+                    'assets/background1.jpg',
+                    fit: BoxFit.cover,
+                  ),
+                  BackdropFilter(
+                    filter: ImageFilter.blur(
+                      sigmaX: _bgBlurAnimation.value,
+                      sigmaY: _bgBlurAnimation.value,
+                    ),
+                    child: Container(
+                      color: Colors.black.withOpacity(0.2),
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Animated Logo
-            ScaleTransition(
-              scale: _logoBounceAnimation,
-              child: Image.asset(
-                'assets/alphabet.png',
-                width: 250,
-                height: 250,
-                fit: BoxFit.contain,
-              ),
-            ),
-            SizedBox(height: 10),
 
-            // "Alphabet Guided Learning App" Text with Pulse Animation
-            ScaleTransition(
-              scale: _textPulseAnimation,
-              child: Text(
-                "Alphabet Guided Learning App",
+          // Foreground Content
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Animated Logo
+              ScaleTransition(
+                scale: _logoBounceAnimation,
+                child: Image.asset(
+                  'assets/alphabet.png',
+                  width: 250,
+                  height: 250,
+                  fit: BoxFit.contain,
+                ),
+              ),
+              SizedBox(height: 10),
+
+              // Animated App Title
+              ScaleTransition(
+                scale: _textPulseAnimation,
+                child: Text(
+                  "Alphabet Guided Learning App",
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.poppins(
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.lightBlue,
+                    shadows: [
+                      Shadow(
+                        blurRadius: 10.0,
+                        color: Colors.white,
+                        offset: Offset(3, 3),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(height: 20),
+
+              // Welcome Text with Glowing Effect
+              Text(
+                "Welcome to AlphaSpeak!",
                 textAlign: TextAlign.center,
-                style: GoogleFonts.berkshireSwash(
-                  fontSize: 26,
+                style: GoogleFonts.poppins(
+                  fontSize: 45,
                   fontWeight: FontWeight.bold,
-                  color: Colors.lightBlue,
+                  color: Colors.white,
+                  letterSpacing: 1.5,
                   shadows: [
                     Shadow(
-                      blurRadius: 6.0,
-                      color: Colors.white,
-                      offset: Offset(2, 2),
-                    ),
-                    Shadow(
-                      blurRadius: 10.0,
-                      color: Colors.white.withOpacity(0.5),
-                      offset: Offset(-1, -1),
+                      blurRadius: 12.0,
+                      color: Colors.blueAccent.withOpacity(0.7),
+                      offset: Offset(-2, -2),
                     ),
                   ],
                 ),
               ),
-            ),
-            SizedBox(height: 20),
+              SizedBox(height: 40),
 
-            // Welcome Text with Soft Glow
-            Text(
-              "Welcome to AlphaSpeak!",
-              textAlign: TextAlign.center,
-              style: GoogleFonts.berkshireSwash(
-                fontSize: 45,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                letterSpacing: 1.5,
-                shadows: [
-                  Shadow(
-                    blurRadius: 8.0,
-                    color: Colors.black54,
-                    offset: Offset(3, 3),
-                  ),
-                  Shadow(
-                    blurRadius: 12.0,
-                    color: Colors.blueAccent.withOpacity(0.5),
-                    offset: Offset(-2, -2),
-                  ),
-                ],
-              ),
-            ),
-
-            SizedBox(height: 40),
-
-            // Play Button with Ripple Effect
-            SlideTransition(
-              position: _buttonOffsetAnimation,
-              child: ScaleTransition(
-                scale: _buttonScaleAnimation,
-                child: GestureDetector(
-                  onTapDown: (_) => setState(() => _buttonScaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(CurvedAnimation(parent: _buttonController, curve: Curves.easeOut))),
-                  onTapUp: (_) => setState(() => _buttonScaleAnimation = Tween<double>(begin: 0.95, end: 1.0).animate(CurvedAnimation(parent: _buttonController, curve: Curves.easeOut))),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [Colors.orangeAccent, Colors.deepOrange],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(50),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.orangeAccent.withOpacity(0.6),
-                          blurRadius: 15,
-                          offset: Offset(0, 6),
+              // Play Button with Animated Glow
+              SlideTransition(
+                position: _buttonOffsetAnimation,
+                child: ScaleTransition(
+                  scale: _buttonScaleAnimation,
+                  child: GestureDetector(
+                    onTap: () => _onPlayButtonPressed(context),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Colors.orangeAccent, Colors.deepOrange],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
-                      ],
-                    ),
-                    child: ElevatedButton(
-                      onPressed: () => _onPlayButtonPressed(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        shadowColor: Colors.transparent,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(50),
-                        ),
-                        padding: EdgeInsets.symmetric(horizontal: 60, vertical: 22),
-                        elevation: 12,
+                        borderRadius: BorderRadius.circular(50),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.orangeAccent.withOpacity(0.9),
+                            blurRadius: 20,
+                            spreadRadius: 2,
+                            offset: Offset(0, 6),
+                          ),
+                        ],
                       ),
+                      padding: EdgeInsets.symmetric(horizontal: 60, vertical: 22),
                       child: Text(
                         'Play',
-                        style: GoogleFonts.berkshireSwash(
+                        style: GoogleFonts.poppins(
                           fontSize: 36,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                           shadows: [
                             Shadow(
-                              blurRadius: 6.0,
+                              blurRadius: 10.0,
                               color: Colors.black54,
-                              offset: Offset(2, 2),
+                              offset: Offset(3, 3),
                             ),
                           ],
                         ),
@@ -261,10 +275,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                   ),
                 ),
               ),
-            ),
-
-          ],
-        ),
+            ],
+          ),
+        ],
       ),
     );
   }

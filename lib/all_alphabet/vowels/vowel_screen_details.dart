@@ -56,7 +56,7 @@ class _VowelScreenDetailsState extends State<VowelScreenDetails> {
       appBar: AppBar(
         title: Text(
           '${widget.vowel} Vowel Words',
-          style: GoogleFonts.berkshireSwash(fontSize: 28, color: Colors.white),
+          style: GoogleFonts.poppins(fontSize: 28, color: Colors.white),
         ),
         backgroundColor: Colors.pinkAccent,
         iconTheme: IconThemeData(color: Colors.white),
@@ -77,7 +77,7 @@ class _VowelScreenDetailsState extends State<VowelScreenDetails> {
                   // Display Vowel Pronunciation
                   Text(
                     widget.vowel,
-                    style: GoogleFonts.berkshireSwash(
+                    style: GoogleFonts.poppins(
                       fontSize: 80,
                       fontWeight: FontWeight.bold,
                       color: Colors.pinkAccent,
@@ -101,7 +101,7 @@ class _VowelScreenDetailsState extends State<VowelScreenDetails> {
                     ),
                     child: Text(
                       "Example Words",
-                      style: GoogleFonts.berkshireSwash(
+                      style: GoogleFonts.poppins(
                         fontSize: 26,
                         fontWeight: FontWeight.bold,
                         color: Colors.white, // White text for contrast
@@ -137,7 +137,7 @@ class _VowelScreenDetailsState extends State<VowelScreenDetails> {
           leading: Icon(Icons.volume_up, color: Colors.pinkAccent),
           title: Text(
             word,
-            style: GoogleFonts.berkshireSwash(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black87),
+            style: GoogleFonts.poppins(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black87),
           ),
           onTap: () => _speak(word),
         ),

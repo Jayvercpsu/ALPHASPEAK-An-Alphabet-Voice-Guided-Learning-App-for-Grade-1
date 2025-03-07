@@ -98,7 +98,7 @@ class _VowelScreenState extends State<VowelScreen> with TickerProviderStateMixin
           child: Center(
             child: Text(
               letter,
-              style: GoogleFonts.berkshireSwash(
+              style: GoogleFonts.poppins(
                 fontSize: 80,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
@@ -123,7 +123,7 @@ class _VowelScreenState extends State<VowelScreen> with TickerProviderStateMixin
       appBar: AppBar(
         title: Text(
           'Vowels 🎶',
-          style: GoogleFonts.berkshireSwash(fontSize: 28, color: Colors.white),
+          style: GoogleFonts.poppins(fontSize: 28, color: Colors.white),
         ),
         backgroundColor: Colors.pinkAccent,
         iconTheme: IconThemeData(color: Colors.white),

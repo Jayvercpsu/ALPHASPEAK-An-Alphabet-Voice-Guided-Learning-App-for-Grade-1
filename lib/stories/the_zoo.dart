@@ -153,7 +153,7 @@
                           title: Text(
                             message,
                             textAlign: TextAlign.center,
-                            style: GoogleFonts.berkshireSwash(
+                            style: GoogleFonts.poppins(
                                 fontSize: 22, color: Colors.pinkAccent),
                           ),
                           content: Column(
@@ -164,7 +164,7 @@
                               Text(
                                 "Your Score: $score/6\n${_getStars(score)}",
                                 textAlign: TextAlign.center,
-                                style: GoogleFonts.berkshireSwash(
+                                style: GoogleFonts.poppins(
                                     fontSize: 18, color: Colors.black),
                               ),
                               SizedBox(height: 20),
@@ -177,7 +177,7 @@
                                     backgroundColor: Colors.pinkAccent),
                                 child: Text(
                                   "Close",
-                                  style: GoogleFonts.berkshireSwash(
+                                  style: GoogleFonts.poppins(
                                       fontSize: 18, color: Colors.white),
                                 ),
                               ),
@@ -205,7 +205,7 @@
                       backgroundColor: Colors.pinkAccent,
                       title: Text(
                         'Stories 📚',
-                        style: GoogleFonts.berkshireSwash(
+                        style: GoogleFonts.poppins(
                             fontSize: 28, color: Colors.white),
                       ),
                       iconTheme: IconThemeData(color: Colors.white),
@@ -240,7 +240,7 @@
                                 children: [
                                   Text(
                                     "The Zoo",
-                                    style: GoogleFonts.berkshireSwash(
+                                    style: GoogleFonts.poppins(
                                       fontSize: 28,
                                       color: Colors.white,
                                       shadows: [
@@ -264,7 +264,7 @@
                                   ElevatedButton(
                                     onPressed: _checkAnswers,
                                     child: Text("Submit Answer",
-                                        style: GoogleFonts.berkshireSwash(
+                                        style: GoogleFonts.poppins(
                                             fontSize: 20, color: Colors.white)),
                                     style: ElevatedButton.styleFrom(
                                         backgroundColor: Colors.pinkAccent),
@@ -446,7 +446,7 @@
                           title: Text(
                             'School History 🏫',
                             textAlign: TextAlign.center,
-                            style: GoogleFonts.berkshireSwash(
+                            style: GoogleFonts.poppins(
                                 fontSize: 24, color: Colors.pinkAccent),
                           ),
                           content: Container(
@@ -497,7 +497,7 @@
                               icon: Icon(Icons.delete, color: Colors.redAccent),
                               label: Text(
                                 "Delete",
-                                style: GoogleFonts.berkshireSwash(
+                                style: GoogleFonts.poppins(
                                     fontSize: 18, color: Colors.redAccent),
                               ),
                             ),
@@ -506,7 +506,7 @@
                               icon: Icon(Icons.close, color: Colors.pinkAccent),
                               label: Text(
                                 "Close",
-                                style: GoogleFonts.berkshireSwash(
+                                style: GoogleFonts.poppins(
                                     fontSize: 18, color: Colors.pinkAccent),
                               ),
                             ),
@@ -522,7 +522,7 @@
                         AlertDialog(
                           title: Text(
                             "Delete Confirmation",
-                            style: GoogleFonts.berkshireSwash(
+                            style: GoogleFonts.poppins(
                                 fontSize: 22, color: Colors.redAccent),
                           ),
                           content: Text(
@@ -536,7 +536,7 @@
                               },
                               child: Text(
                                 "Cancel",
-                                style: GoogleFonts.berkshireSwash(
+                                style: GoogleFonts.poppins(
                                     fontSize: 18, color: Colors.blueAccent),
                               ),
                             ),
@@ -548,7 +548,7 @@
                               },
                               child: Text(
                                 "Delete",
-                                style: GoogleFonts.berkshireSwash(
+                                style: GoogleFonts.poppins(
                                     fontSize: 18, color: Colors.redAccent),
                               ),
                             ),

@@ -131,7 +131,7 @@ class _VowelScreenState extends State<VowelScreen> with TickerProviderStateMixin
           child: Center(
             child: Text(
               letter,
-              style: GoogleFonts.berkshireSwash(
+              style: GoogleFonts.poppins(
                 fontSize: 80,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
@@ -156,7 +156,7 @@ class _VowelScreenState extends State<VowelScreen> with TickerProviderStateMixin
       appBar: AppBar(
         title: Text(
           'Check Pronunciation 🎶',
-          style: GoogleFonts.berkshireSwash(fontSize: 28, color: Colors.white),
+          style: GoogleFonts.poppins(fontSize: 25, color: Colors.white),
         ),
         backgroundColor: Colors.pinkAccent,
         iconTheme: IconThemeData(color: Colors.white),
@@ -175,7 +175,7 @@ class _VowelScreenState extends State<VowelScreen> with TickerProviderStateMixin
                   child: SlideTransition(
                     position: _slideAnimation,
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+                      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 25),
                       child: GridView.builder(
                         padding: EdgeInsets.all(10),
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -210,7 +210,7 @@ class _VowelScreenState extends State<VowelScreen> with TickerProviderStateMixin
                     ),
                     child: Text(
                       "View Score History",
-                      style: GoogleFonts.berkshireSwash(
+                      style: GoogleFonts.poppins(
                         fontSize: 22,
                         color: Colors.white,
                         fontWeight: FontWeight.bold,

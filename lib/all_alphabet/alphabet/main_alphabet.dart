@@ -57,7 +57,7 @@ class _MainAlphabetState extends State<MainAlphabet> with TickerProviderStateMix
       appBar: AppBar(
         title: Text(
           'Alphabet Categories',
-          style: GoogleFonts.berkshireSwash(fontSize: 26, color: Colors.white),
+          style: GoogleFonts.poppins(fontSize: 26, color: Colors.white),
         ),
         backgroundColor: Colors.pinkAccent,
         iconTheme: IconThemeData(color: Colors.white),
@@ -135,7 +135,7 @@ class _MainAlphabetState extends State<MainAlphabet> with TickerProviderStateMix
             SizedBox(width: 10),
             Text(
               title,
-              style: GoogleFonts.berkshireSwash(
+              style: GoogleFonts.poppins(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,

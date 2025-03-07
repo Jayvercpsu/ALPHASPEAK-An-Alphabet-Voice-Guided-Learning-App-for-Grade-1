@@ -133,7 +133,7 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen> {
         backgroundColor: Colors.pinkAccent,
         title: Text(
           'Rhyme Words ',
-          style: GoogleFonts.berkshireSwash(fontSize: 28, color: Colors.white),
+          style: GoogleFonts.poppins(fontSize: 28, color: Colors.white),
         ),
         actions: [
           GestureDetector(
@@ -152,7 +152,7 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen> {
               padding: EdgeInsets.symmetric(horizontal: 16),
               child: Text(
                 'Score: $_score', // ✅ Clickable score
-                style: GoogleFonts.berkshireSwash(
+                style: GoogleFonts.poppins(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: Colors.white, // ✅ Text color pink for contrast
@@ -215,7 +215,7 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen> {
           ),
           child: Text(
             'Find the word that rhymes with:',
-            style: GoogleFonts.berkshireSwash(
+            style: GoogleFonts.poppins(
               fontSize: 24,
               color: Colors.white,
               fontWeight: FontWeight.bold,
@@ -241,7 +241,7 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen> {
             children: [
               Text(
                 _targetWord,
-                style: GoogleFonts.berkshireSwash(
+                style: GoogleFonts.poppins(
                   fontSize: 36,
                   fontWeight: FontWeight.bold,
                   color: Colors.pinkAccent,
@@ -296,7 +296,7 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen> {
         child: Center(
           child: Text(
             word,
-            style: GoogleFonts.berkshireSwash(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
+            style: GoogleFonts.poppins(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
           ),
         ),
       ),

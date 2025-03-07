@@ -133,7 +133,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             child: Text(
                               "AlphaSpeak: Alphabet Learning App",
                               textAlign: TextAlign.center,
-                              style: GoogleFonts.berkshireSwash(
+                              style: GoogleFonts.poppins(
                                 fontSize: 30,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.black,
@@ -323,7 +323,7 @@ class _FeatureButtonState extends State<_FeatureButton> {
                 ),
                 child: Text(
                   widget.text,
-                  style: GoogleFonts.berkshireSwash(
+                  style: GoogleFonts.poppins(
                       fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
                 ),
               ),

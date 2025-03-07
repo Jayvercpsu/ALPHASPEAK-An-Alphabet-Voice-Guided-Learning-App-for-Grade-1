@@ -63,8 +63,8 @@ class _SplashScreenState extends State<SplashScreen> {
                 Text(
                   'In Partnership with',
                   style: GoogleFonts.poppins(
-                    fontSize: 18,
-                    color: Colors.black,
+                    fontSize: 25,
+                    color: Colors.white,
                   ),
                   textAlign: TextAlign.center,
                 ),

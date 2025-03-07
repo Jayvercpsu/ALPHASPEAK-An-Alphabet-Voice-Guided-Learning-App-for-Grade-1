@@ -133,7 +133,7 @@ class _MediumWordPuzzleScreenState extends State<MediumWordPuzzleScreen> with Si
       appBar: AppBar(
         title: Text(
           'Medium Word Puzzle 🎈',
-          style: GoogleFonts.berkshireSwash(fontSize: 28, color: Colors.white),
+          style: GoogleFonts.poppins(fontSize: 28, color: Colors.white),
         ),
         backgroundColor: Colors.pinkAccent,
         iconTheme: IconThemeData(color: Colors.white),
@@ -168,7 +168,7 @@ class _MediumWordPuzzleScreenState extends State<MediumWordPuzzleScreen> with Si
                   children: [
                     Text(
                       "Score: $_score",
-                      style: GoogleFonts.berkshireSwash(
+                      style: GoogleFonts.poppins(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
                         color: Colors.yellow,
@@ -299,7 +299,7 @@ class _MediumWordPuzzleScreenState extends State<MediumWordPuzzleScreen> with Si
     return ElevatedButton(
       onPressed: _initializePuzzle,
       style: ElevatedButton.styleFrom(backgroundColor: Colors.pinkAccent),
-      child: Text("Next Word", style: GoogleFonts.berkshireSwash(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
+      child: Text("Next Word", style: GoogleFonts.poppins(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
     );
   }
 }

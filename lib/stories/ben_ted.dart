@@ -151,7 +151,7 @@ class _BenTedScreenState extends State<BenTedScreen> with SingleTickerProviderSt
             title: Text(
               message,
               textAlign: TextAlign.center,
-              style: GoogleFonts.berkshireSwash(
+              style: GoogleFonts.poppins(
                   fontSize: 22, color: Colors.pinkAccent),
             ),
             content: Column(
@@ -162,7 +162,7 @@ class _BenTedScreenState extends State<BenTedScreen> with SingleTickerProviderSt
                 Text(
                   "Your Score: $score/5\n${_getStars(score)}",
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.berkshireSwash(
+                  style: GoogleFonts.poppins(
                       fontSize: 18, color: Colors.black),
                 ),
                 SizedBox(height: 20),
@@ -175,7 +175,7 @@ class _BenTedScreenState extends State<BenTedScreen> with SingleTickerProviderSt
                       backgroundColor: Colors.pinkAccent),
                   child: Text(
                     "Close",
-                    style: GoogleFonts.berkshireSwash(
+                    style: GoogleFonts.poppins(
                         fontSize: 18, color: Colors.white),
                   ),
                 ),
@@ -203,7 +203,7 @@ class _BenTedScreenState extends State<BenTedScreen> with SingleTickerProviderSt
         backgroundColor: Colors.pinkAccent,
         title: Text(
           'Stories 📚',
-          style: GoogleFonts.berkshireSwash(
+          style: GoogleFonts.poppins(
               fontSize: 28, color: Colors.white),
         ),
         iconTheme: IconThemeData(color: Colors.white),
@@ -238,7 +238,7 @@ class _BenTedScreenState extends State<BenTedScreen> with SingleTickerProviderSt
                   children: [
                     Text(
                       "Ted and Ben's Adventure",
-                      style: GoogleFonts.berkshireSwash(
+                      style: GoogleFonts.poppins(
                         fontSize: 28,
                         color: Colors.white,
                         shadows: [
@@ -262,7 +262,7 @@ class _BenTedScreenState extends State<BenTedScreen> with SingleTickerProviderSt
                     ElevatedButton(
                       onPressed: _checkAnswers,
                       child: Text("Submit Answer",
-                          style: GoogleFonts.berkshireSwash(
+                          style: GoogleFonts.poppins(
                               fontSize: 20, color: Colors.white)),
                       style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.pinkAccent),
@@ -433,7 +433,7 @@ class _BenTedScreenState extends State<BenTedScreen> with SingleTickerProviderSt
             title: Text(
               'School History 🏫',
               textAlign: TextAlign.center,
-              style: GoogleFonts.berkshireSwash(
+              style: GoogleFonts.poppins(
                   fontSize: 24, color: Colors.pinkAccent),
             ),
             content: Container(
@@ -484,7 +484,7 @@ class _BenTedScreenState extends State<BenTedScreen> with SingleTickerProviderSt
                 icon: Icon(Icons.delete, color: Colors.redAccent),
                 label: Text(
                   "Delete",
-                  style: GoogleFonts.berkshireSwash(
+                  style: GoogleFonts.poppins(
                       fontSize: 18, color: Colors.redAccent),
                 ),
               ),
@@ -493,7 +493,7 @@ class _BenTedScreenState extends State<BenTedScreen> with SingleTickerProviderSt
                 icon: Icon(Icons.close, color: Colors.pinkAccent),
                 label: Text(
                   "Close",
-                  style: GoogleFonts.berkshireSwash(
+                  style: GoogleFonts.poppins(
                       fontSize: 18, color: Colors.pinkAccent),
                 ),
               ),
@@ -509,7 +509,7 @@ class _BenTedScreenState extends State<BenTedScreen> with SingleTickerProviderSt
           AlertDialog(
             title: Text(
               "Delete Confirmation",
-              style: GoogleFonts.berkshireSwash(
+              style: GoogleFonts.poppins(
                   fontSize: 22, color: Colors.redAccent),
             ),
             content: Text(
@@ -523,7 +523,7 @@ class _BenTedScreenState extends State<BenTedScreen> with SingleTickerProviderSt
                 },
                 child: Text(
                   "Cancel",
-                  style: GoogleFonts.berkshireSwash(
+                  style: GoogleFonts.poppins(
                       fontSize: 18, color: Colors.blueAccent),
                 ),
               ),
@@ -535,7 +535,7 @@ class _BenTedScreenState extends State<BenTedScreen> with SingleTickerProviderSt
                 },
                 child: Text(
                   "Delete",
-                  style: GoogleFonts.berkshireSwash(
+                  style: GoogleFonts.poppins(
                       fontSize: 18, color: Colors.redAccent),
                 ),
               ),

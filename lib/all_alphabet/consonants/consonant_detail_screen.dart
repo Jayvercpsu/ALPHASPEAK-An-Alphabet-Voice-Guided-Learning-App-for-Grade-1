@@ -61,7 +61,7 @@ class _ConsonantDetailScreenState extends State<ConsonantDetailScreen> {
       appBar: AppBar(
         title: Text(
           '${widget.letter} Consonant Words',
-          style: GoogleFonts.berkshireSwash(fontSize: 28, color: Colors.white),
+          style: GoogleFonts.poppins(fontSize: 28, color: Colors.white),
         ),
         backgroundColor: Colors.pinkAccent,
         iconTheme: IconThemeData(color: Colors.white),
@@ -79,7 +79,7 @@ class _ConsonantDetailScreenState extends State<ConsonantDetailScreen> {
               children: [
                 Text(
                   '/${widget.letter.toLowerCase()}/',
-                  style: GoogleFonts.berkshireSwash(
+                  style: GoogleFonts.poppins(
                     fontSize: 80,
                     fontWeight: FontWeight.bold,
                     color: Colors.pinkAccent,
@@ -103,7 +103,7 @@ class _ConsonantDetailScreenState extends State<ConsonantDetailScreen> {
                   ),
                   child: Text(
                     "Example Words",
-                    style: GoogleFonts.berkshireSwash(
+                    style: GoogleFonts.poppins(
                       fontSize: 26,
                       fontWeight: FontWeight.bold,
                       color: Colors.white, // White text for contrast
@@ -138,7 +138,7 @@ class _ConsonantDetailScreenState extends State<ConsonantDetailScreen> {
           leading: Icon(Icons.volume_up, color: Colors.pinkAccent),
           title: Text(
             word,
-            style: GoogleFonts.berkshireSwash(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black87),
+            style: GoogleFonts.poppins(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black87),
           ),
           onTap: () => _speak(word),
         ),

@@ -127,7 +127,7 @@ class _EasyWordPuzzleScreenState extends State<EasyWordPuzzleScreen> with Single
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Easy Word Puzzle 🎈', style: GoogleFonts.berkshireSwash(fontSize: 28, color: Colors.white)),
+        title: Text('Easy Word Puzzle 🎈', style: GoogleFonts.poppins(fontSize: 28, color: Colors.white)),
         backgroundColor: Colors.pinkAccent,
         iconTheme: IconThemeData(color: Colors.white),
         actions: [
@@ -163,7 +163,7 @@ class _EasyWordPuzzleScreenState extends State<EasyWordPuzzleScreen> with Single
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text("Score: $_score", style: GoogleFonts.berkshireSwash(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.yellow)),
+                Text("Score: $_score", style: GoogleFonts.poppins(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.yellow)),
                 _buildWordSlots(),
                 _buildScrambledLetters(),
                 _buildResetButton(),
@@ -269,7 +269,7 @@ class _EasyWordPuzzleScreenState extends State<EasyWordPuzzleScreen> with Single
     return ElevatedButton(
       onPressed: _initializePuzzle,
       style: ElevatedButton.styleFrom(backgroundColor: Colors.pinkAccent),
-      child: Text("Next Word", style: GoogleFonts.berkshireSwash(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
+      child: Text("Next Word", style: GoogleFonts.poppins(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
     );
   }
 }

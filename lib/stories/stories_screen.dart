@@ -65,7 +65,7 @@ class _StoriesScreenState extends State<StoriesScreen> with SingleTickerProvider
       appBar: AppBar(
         title: Text(
           'Stories 📚',
-          style: GoogleFonts.berkshireSwash(fontSize: 28, color: Colors.white),
+          style: GoogleFonts.poppins(fontSize: 28, color: Colors.white),
         ),
         backgroundColor: Colors.pinkAccent,
         iconTheme: IconThemeData(color: Colors.white),
@@ -95,7 +95,7 @@ class _StoriesScreenState extends State<StoriesScreen> with SingleTickerProvider
                     SizedBox(height: screenHeight * 0.05),
                     Text(
                       "Choose a Story",
-                      style: GoogleFonts.berkshireSwash(
+                      style: GoogleFonts.poppins(
                         fontSize: screenHeight * 0.035,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -171,7 +171,7 @@ class _StoriesScreenState extends State<StoriesScreen> with SingleTickerProvider
             SizedBox(height: 10),
             Text(
               title,
-              style: GoogleFonts.berkshireSwash(
+              style: GoogleFonts.poppins(
                 fontSize: screenHeight * 0.03,
                 fontWeight: FontWeight.bold,
                 color: Colors.black,

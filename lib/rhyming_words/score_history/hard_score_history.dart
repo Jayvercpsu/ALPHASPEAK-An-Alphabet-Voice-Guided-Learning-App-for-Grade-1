@@ -46,7 +46,7 @@ class _HardScoreHistoryScreen extends State<HardScoreHistoryScreen> {
       SnackBar(
         content: Text(
           '🎉 Score has been reset successfully!',
-          style: GoogleFonts.berkshireSwash(fontSize: 16, color: Colors.white),
+          style: GoogleFonts.poppins(fontSize: 16, color: Colors.white),
         ),
         backgroundColor: Colors.green,
         behavior: SnackBarBehavior.floating,
@@ -61,12 +61,12 @@ class _HardScoreHistoryScreen extends State<HardScoreHistoryScreen> {
         return AlertDialog(
           title: Text(
             'Confirm Reset',
-            style: GoogleFonts.berkshireSwash(
+            style: GoogleFonts.poppins(
                 fontSize: 22, fontWeight: FontWeight.bold),
           ),
           content: Text(
             'Are you sure you want to reset the score?',
-            style: GoogleFonts.berkshireSwash(fontSize: 18),
+            style: GoogleFonts.poppins(fontSize: 18),
           ),
           actions: [
             TextButton(
@@ -100,7 +100,7 @@ class _HardScoreHistoryScreen extends State<HardScoreHistoryScreen> {
       appBar: AppBar(
         title: Text(
           'Hard Score History 🏆',
-          style: GoogleFonts.berkshireSwash(fontSize: 26, color: Colors.white),
+          style: GoogleFonts.poppins(fontSize: 26, color: Colors.white),
         ),
         backgroundColor: Colors.pinkAccent,
         iconTheme: IconThemeData(color: Colors.white),
@@ -142,7 +142,7 @@ class _HardScoreHistoryScreen extends State<HardScoreHistoryScreen> {
                     children: [
                       Text(
                         'Your Current Score:',
-                        style: GoogleFonts.berkshireSwash(
+                        style: GoogleFonts.poppins(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
                             color: Colors.pinkAccent),
@@ -150,7 +150,7 @@ class _HardScoreHistoryScreen extends State<HardScoreHistoryScreen> {
                       SizedBox(height: 10),
                       Text(
                         '$_currentScore',
-                        style: GoogleFonts.berkshireSwash(
+                        style: GoogleFonts.poppins(
                             fontSize: 48,
                             fontWeight: FontWeight.bold,
                             color: Colors.deepOrangeAccent),
@@ -203,7 +203,7 @@ class _HardScoreHistoryScreen extends State<HardScoreHistoryScreen> {
             Text(
               text,
               style:
-                  GoogleFonts.berkshireSwash(fontSize: 20, color: Colors.white),
+                  GoogleFonts.poppins(fontSize: 20, color: Colors.white),
             ),
           ],
         ),

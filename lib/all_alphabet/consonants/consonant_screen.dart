@@ -105,7 +105,7 @@ class _ConsonantScreenState extends State<ConsonantScreen> with TickerProviderSt
           child: Center(
             child: Text(
               letter,
-              style: GoogleFonts.berkshireSwash(
+              style: GoogleFonts.poppins(
                 fontSize: 50, // 🔥 Adjusted font size from 80 to 60
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
@@ -130,7 +130,7 @@ class _ConsonantScreenState extends State<ConsonantScreen> with TickerProviderSt
       appBar: AppBar(
         title: Text(
           'Consonants 🎶',
-          style: GoogleFonts.berkshireSwash(fontSize: 28, color: Colors.white),
+          style: GoogleFonts.poppins(fontSize: 28, color: Colors.white),
         ),
         backgroundColor: Colors.pinkAccent,
         iconTheme: IconThemeData(color: Colors.white),

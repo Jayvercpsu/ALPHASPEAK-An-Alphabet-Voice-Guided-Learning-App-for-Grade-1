@@ -127,7 +127,7 @@ class _AlphabetScreenState extends State<AlphabetScreen> {
       appBar: AppBar(
         title: Text(
           'Learn Alphabets',
-          style: GoogleFonts.berkshireSwash(fontSize: 26, color: Colors.white),
+          style: GoogleFonts.poppins(fontSize: 26, color: Colors.white),
         ),
         iconTheme: IconThemeData(color: Colors.white),
         backgroundColor: Colors.pinkAccent,
@@ -155,7 +155,7 @@ class _AlphabetScreenState extends State<AlphabetScreen> {
           SizedBox(height: 20),
           Text(
             'Loading...',
-            style: GoogleFonts.berkshireSwash(fontSize: 24, color: Colors.white),
+            style: GoogleFonts.poppins(fontSize: 24, color: Colors.white),
           ),
         ],
       ),
@@ -188,7 +188,7 @@ class _AlphabetScreenState extends State<AlphabetScreen> {
               SizedBox(height: 20),
               Text(
                 _examples.values.elementAt(_currentIndex),
-                style: GoogleFonts.berkshireSwash(fontSize: 60, color: Colors.white),
+                style: GoogleFonts.poppins(fontSize: 60, color: Colors.white),
               ),
             ],
           ),
@@ -233,7 +233,7 @@ class _AlphabetScreenState extends State<AlphabetScreen> {
                     child: Center(
                       child: Text(
                         letter,
-                        style: GoogleFonts.berkshireSwash(
+                        style: GoogleFonts.poppins(
                           fontSize: _currentIndex == index ? 30 : 20,
                           fontWeight: FontWeight.bold,
                           color: _currentIndex == index ? Colors.white : Colors.black,

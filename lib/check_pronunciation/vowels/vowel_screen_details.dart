@@ -141,7 +141,7 @@ class _VowelScreenDetailsState extends State<VowelScreenDetails> {
       SnackBar(
         content: Text(
           message,
-          style: GoogleFonts.berkshireSwash(fontSize: 18, color: Colors.white),
+          style: GoogleFonts.poppins(fontSize: 18, color: Colors.white),
         ),
         backgroundColor: color,
         duration: Duration(seconds: 2),
@@ -157,7 +157,7 @@ class _VowelScreenDetailsState extends State<VowelScreenDetails> {
       appBar: AppBar(
         title: Text(
           '${widget.vowel} Vowel Words',
-          style: GoogleFonts.berkshireSwash(fontSize: 28, color: Colors.white),
+          style: GoogleFonts.poppins(fontSize: 28, color: Colors.white),
         ),
         backgroundColor: Colors.pinkAccent,
         iconTheme: IconThemeData(color: Colors.white),
@@ -183,7 +183,7 @@ class _VowelScreenDetailsState extends State<VowelScreenDetails> {
               Text(
                 widget.vowel,
                 textAlign: TextAlign.center,
-                style: GoogleFonts.berkshireSwash(
+                style: GoogleFonts.poppins(
                   fontSize: 80,
                   fontWeight: FontWeight.bold,
                   color: Colors.pinkAccent,
@@ -220,14 +220,14 @@ class _VowelScreenDetailsState extends State<VowelScreenDetails> {
         leading: Icon(Icons.volume_up, color: Colors.pinkAccent),
         title: Text(
           word,
-          style: GoogleFonts.berkshireSwash(fontSize: 24, color: Colors.black),
+          style: GoogleFonts.poppins(fontSize: 24, color: Colors.black),
         ),
         trailing: ElevatedButton(
           onPressed: () => _startCountdown(word),
           child: _currentWord == word && _countdowns[word]! > 0
               ? Text(
             '${_countdowns[word]}',
-            style: GoogleFonts.berkshireSwash(
+            style: GoogleFonts.poppins(
               fontSize: 24,
               color: Colors.white,
             ),
@@ -237,7 +237,7 @@ class _VowelScreenDetailsState extends State<VowelScreenDetails> {
             children: [
               Icon(Icons.mic, color: Colors.white),
               SizedBox(width: 5),
-              Text('Speak', style: GoogleFonts.berkshireSwash(fontSize: 18, color: Colors.white)),
+              Text('Speak', style: GoogleFonts.poppins(fontSize: 18, color: Colors.white)),
             ],
           ),
           style: ElevatedButton.styleFrom(

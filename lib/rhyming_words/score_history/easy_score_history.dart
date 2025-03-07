@@ -45,7 +45,7 @@ class _EasyScoreHistoryScreen extends State<EasyScoreHistoryScreen> {
       SnackBar(
         content: Text(
           '🎉 Score has been reset successfully!',
-          style: GoogleFonts.berkshireSwash(fontSize: 16, color: Colors.white),
+          style: GoogleFonts.poppins(fontSize: 16, color: Colors.white),
         ),
         backgroundColor: Colors.green,
         behavior: SnackBarBehavior.floating,
@@ -84,7 +84,7 @@ class _EasyScoreHistoryScreen extends State<EasyScoreHistoryScreen> {
       appBar: AppBar(
         title: Text(
           'Easy Score History 🏆',
-          style: GoogleFonts.berkshireSwash(fontSize: 26, color: Colors.white),
+          style: GoogleFonts.poppins(fontSize: 26, color: Colors.white),
         ),
         backgroundColor: Colors.pinkAccent,
         iconTheme: IconThemeData(color: Colors.white),
@@ -123,12 +123,12 @@ class _EasyScoreHistoryScreen extends State<EasyScoreHistoryScreen> {
                     children: [
                       Text(
                         'Your Current Score:',
-                        style: GoogleFonts.berkshireSwash(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.pinkAccent),
+                        style: GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.pinkAccent),
                       ),
                       SizedBox(height: 10),
                       Text(
                         '$_currentScore',
-                        style: GoogleFonts.berkshireSwash(fontSize: 48, fontWeight: FontWeight.bold, color: Colors.deepOrangeAccent),
+                        style: GoogleFonts.poppins(fontSize: 48, fontWeight: FontWeight.bold, color: Colors.deepOrangeAccent),
                       ),
                     ],
                   ),
@@ -172,7 +172,7 @@ class _EasyScoreHistoryScreen extends State<EasyScoreHistoryScreen> {
             SizedBox(width: 10),
             Text(
               text,
-              style: GoogleFonts.berkshireSwash(fontSize: 20, color: Colors.white),
+              style: GoogleFonts.poppins(fontSize: 20, color: Colors.white),
             ),
           ],
         ),

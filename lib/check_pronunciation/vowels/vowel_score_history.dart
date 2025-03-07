@@ -57,7 +57,7 @@ class _VowelScoreHistoryState extends State<VowelScoreHistory> {
       SnackBar(
         content: Text(
           message,
-          style: GoogleFonts.berkshireSwash(fontSize: 18, color: Colors.white),
+          style: GoogleFonts.poppins(fontSize: 18, color: Colors.white),
         ),
         backgroundColor: Colors.green,
         duration: Duration(seconds: 2),
@@ -71,11 +71,11 @@ class _VowelScoreHistoryState extends State<VowelScoreHistory> {
       builder: (context) => AlertDialog(
         title: Text(
           'Confirm Reset',
-          style: GoogleFonts.berkshireSwash(fontSize: 22, color: Colors.pinkAccent),
+          style: GoogleFonts.poppins(fontSize: 22, color: Colors.pinkAccent),
         ),
         content: Text(
           'Are you sure you want to reset your score?',
-          style: GoogleFonts.berkshireSwash(fontSize: 18),
+          style: GoogleFonts.poppins(fontSize: 18),
         ),
         actions: [
           TextButton(
@@ -85,7 +85,7 @@ class _VowelScoreHistoryState extends State<VowelScoreHistory> {
             },
             child: Text(
               'Cancel',
-              style: GoogleFonts.berkshireSwash(color: Colors.pinkAccent),
+              style: GoogleFonts.poppins(color: Colors.pinkAccent),
             ),
           ),
           TextButton(
@@ -95,7 +95,7 @@ class _VowelScoreHistoryState extends State<VowelScoreHistory> {
             },
             child: Text(
               'Reset',
-              style: GoogleFonts.berkshireSwash(color: Colors.redAccent),
+              style: GoogleFonts.poppins(color: Colors.redAccent),
             ),
           ),
         ],
@@ -109,7 +109,7 @@ class _VowelScoreHistoryState extends State<VowelScoreHistory> {
       appBar: AppBar(
         title: Text(
           'Vowel Score History',
-          style: GoogleFonts.berkshireSwash(fontSize: 28, color: Colors.white),
+          style: GoogleFonts.poppins(fontSize: 28, color: Colors.white),
         ),
         backgroundColor: Colors.pinkAccent,
         iconTheme: IconThemeData(color: Colors.white),
@@ -135,7 +135,7 @@ class _VowelScoreHistoryState extends State<VowelScoreHistory> {
               children: [
                 Text(
                   'Your Total Score',
-                  style: GoogleFonts.berkshireSwash(
+                  style: GoogleFonts.poppins(
                     fontSize: 30,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
@@ -144,7 +144,7 @@ class _VowelScoreHistoryState extends State<VowelScoreHistory> {
                 SizedBox(height: 20),
                 Text(
                   '$_totalScore',
-                  style: GoogleFonts.berkshireSwash(
+                  style: GoogleFonts.poppins(
                     fontSize: 60,
                     color: Colors.pinkAccent,
                     fontWeight: FontWeight.bold,
@@ -162,7 +162,7 @@ class _VowelScoreHistoryState extends State<VowelScoreHistory> {
                   ),
                   child: Text(
                     'Reset Score',
-                    style: GoogleFonts.berkshireSwash(
+                    style: GoogleFonts.poppins(
                       fontSize: 20,
                       color: Colors.white,
                     ),

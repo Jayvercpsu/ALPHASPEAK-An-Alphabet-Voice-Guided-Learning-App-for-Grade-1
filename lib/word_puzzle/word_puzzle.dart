@@ -134,7 +134,7 @@ class _WordPuzzleScreenState extends State<WordPuzzleScreen> with SingleTickerPr
 
       return Scaffold(
         appBar: AppBar(
-          title: Text('Word Puzzle 🎯', style: GoogleFonts.berkshireSwash(fontSize: 28, color: Colors.white)),
+          title: Text('Word Puzzle 🎯', style: GoogleFonts.poppins(fontSize: 28, color: Colors.white)),
           backgroundColor: Colors.pinkAccent,
           iconTheme: IconThemeData(color: Colors.white),
         ),
@@ -159,7 +159,7 @@ class _WordPuzzleScreenState extends State<WordPuzzleScreen> with SingleTickerPr
                   children: [
                     Text(
                       "Choose Difficulty",
-                      style: GoogleFonts.berkshireSwash(fontSize: screenHeight * 0.035, fontWeight: FontWeight.bold, color: Colors.white),
+                      style: GoogleFonts.poppins(fontSize: screenHeight * 0.035, fontWeight: FontWeight.bold, color: Colors.white),
                     ),
                     SizedBox(height: screenHeight * 0.02),
                     _buildDifficultyButton("Easy", Colors.greenAccent, screenWidth),
@@ -193,7 +193,7 @@ class _WordPuzzleScreenState extends State<WordPuzzleScreen> with SingleTickerPr
           ),
           child: Text(
             level,
-            style: GoogleFonts.berkshireSwash(
+            style: GoogleFonts.poppins(
               fontSize: 22,
               fontWeight: FontWeight.bold,
               color: Colors.white,
@@ -218,12 +218,12 @@ class _WordPuzzleScreenState extends State<WordPuzzleScreen> with SingleTickerPr
         children: [
           Text(
             "Total Score: ${getTotalScore()}",
-            style: GoogleFonts.berkshireSwash(fontSize: screenHeight * 0.03, fontWeight: FontWeight.bold, color: Colors.pinkAccent),
+            style: GoogleFonts.poppins(fontSize: screenHeight * 0.03, fontWeight: FontWeight.bold, color: Colors.pinkAccent),
           ),
           SizedBox(height: screenHeight * 0.01),
           Text(
             "Easy: $_easyScore | Medium: $_mediumScore | Hard: $_hardScore",
-            style: GoogleFonts.berkshireSwash(fontSize: screenHeight * 0.025, color: Colors.black),
+            style: GoogleFonts.poppins(fontSize: screenHeight * 0.025, color: Colors.black),
           ),
         ],
       ),
