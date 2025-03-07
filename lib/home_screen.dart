@@ -4,7 +4,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'all_alphabet/alphabet/main_alphabet.dart';
 import 'rhyming_words/main_rhyming_words.dart';
-import 'check_pronunciation/check_pronunciation.dart';
+import 'check_pronunciation/vowels/vowel_screen.dart';
 import 'word_puzzle/word_puzzle.dart';
 import 'stories/stories_screen.dart';
 
@@ -181,7 +181,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   _FeatureItem(
                                     text: "Check Pronunciation",
                                     imagePath: 'assets/home-screen/voice.png',
-                                    screen: CheckPronunciationScreen(audioPlayer: widget.audioPlayer),
+                                    screen: VowelScreen(audioPlayer: widget.audioPlayer),
                                   ),
                                   _FeatureItem(
                                     text: "Word Puzzle",
