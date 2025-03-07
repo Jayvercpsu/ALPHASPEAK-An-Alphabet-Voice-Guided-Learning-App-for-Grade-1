@@ -137,9 +137,6 @@ class _WordPuzzleScreenState extends State<WordPuzzleScreen> with SingleTickerPr
           title: Text('Word Puzzle 🎯', style: GoogleFonts.berkshireSwash(fontSize: 28, color: Colors.white)),
           backgroundColor: Colors.pinkAccent,
           iconTheme: IconThemeData(color: Colors.white),
-          actions: [
-            IconButton(icon: Icon(Icons.refresh), onPressed: _resetScores),
-          ],
         ),
         body: Stack(
           children: [
@@ -221,7 +218,7 @@ class _WordPuzzleScreenState extends State<WordPuzzleScreen> with SingleTickerPr
         children: [
           Text(
             "Total Score: ${getTotalScore()}",
-            style: GoogleFonts.berkshireSwash(fontSize: screenHeight * 0.03, fontWeight: FontWeight.bold, color: Colors.blueAccent),
+            style: GoogleFonts.berkshireSwash(fontSize: screenHeight * 0.03, fontWeight: FontWeight.bold, color: Colors.pinkAccent),
           ),
           SizedBox(height: screenHeight * 0.01),
           Text(

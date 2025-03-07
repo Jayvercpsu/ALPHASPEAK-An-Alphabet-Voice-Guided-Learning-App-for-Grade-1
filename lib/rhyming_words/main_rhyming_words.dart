@@ -1,43 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:learn_alphabet/rhyming_words/difficulty/easy_rhyme_word.dart';
-import 'package:learn_alphabet/rhyming_words/difficulty/medium_rhyme_word.dart';
-import 'package:learn_alphabet/rhyming_words/difficulty/hard_rhyme_word.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'difficulty/easy_rhyme_word.dart';
+import 'difficulty/medium_rhyme_word.dart';
+import 'difficulty/hard_rhyme_word.dart';
 
-class MainRhymingWords extends StatefulWidget {
+class RhymingWordsScreen extends StatefulWidget {
   final AudioPlayer audioPlayer;
 
-  const MainRhymingWords({Key? key, required this.audioPlayer}) : super(key: key);
+  const RhymingWordsScreen({Key? key, required this.audioPlayer}) : super(key: key);
 
   @override
-  _MainRhymingWordsState createState() => _MainRhymingWordsState();
+  _RhymingWordsScreenState createState() => _RhymingWordsScreenState();
 }
 
-class _MainRhymingWordsState extends State<MainRhymingWords> with TickerProviderStateMixin {
+class _RhymingWordsScreenState extends State<RhymingWordsScreen> with SingleTickerProviderStateMixin {
   bool _isLoading = true;
   late AnimationController _animationController;
   late Animation<Offset> _slideAnimation;
   final AudioPlayer _tapPlayer = AudioPlayer();
 
+  int _easyScore = 0;
+  int _mediumScore = 0;
+  int _hardScore = 0;
+  String _selectedDifficulty = 'Easy';
+
   @override
   void initState() {
     super.initState();
     _startLoading();
+    _loadScores();
 
-    _animationController = AnimationController(
-      vsync: this,
-      duration: Duration(milliseconds: 800),
-    );
-
-    _slideAnimation = Tween<Offset>(
-      begin: Offset(0, 1), // Start from bottom
-      end: Offset.zero,    // Slide to center
-    ).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeInOut,
-      ),
+    _animationController = AnimationController(vsync: this, duration: Duration(milliseconds: 800));
+    _slideAnimation = Tween<Offset>(begin: Offset(0, 1), end: Offset(0, 0)).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
   }
 
@@ -49,8 +46,20 @@ class _MainRhymingWordsState extends State<MainRhymingWords> with TickerProvider
     _animationController.forward();
   }
 
+  Future<void> _loadScores() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _easyScore = prefs.getInt('easy_score') ?? 0;
+      _mediumScore = prefs.getInt('medium_score') ?? 0;
+      _hardScore = prefs.getInt('hard_score') ?? 0;
+    });
+  }
+
+  int getTotalScore() {
+    return _easyScore + _mediumScore + _hardScore;
+  }
+
   Future<void> _playTapSound() async {
-    await _tapPlayer.stop(); // Stop previous sound
     await _tapPlayer.play(AssetSource('alphabet-sounds/tap.mp3'));
   }
 
@@ -72,9 +81,21 @@ class _MainRhymingWordsState extends State<MainRhymingWords> with TickerProvider
         return;
     }
 
-    Navigator.push(context, MaterialPageRoute(builder: (context) => screen));
+    Navigator.push(context, MaterialPageRoute(builder: (_) => screen)).then((_) => _loadScores());
   }
 
+  void _resetScores() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _easyScore = 0;
+      _mediumScore = 0;
+      _hardScore = 0;
+    });
+
+    prefs.setInt('easy_score_rhyme', 0);
+    prefs.setInt('medium_score_rhyme', 0);
+    prefs.setInt('hard_score_rhyme', 0);
+  }
 
   @override
   void dispose() {
@@ -85,6 +106,9 @@ class _MainRhymingWordsState extends State<MainRhymingWords> with TickerProvider
 
   @override
   Widget build(BuildContext context) {
+    double screenHeight = MediaQuery.of(context).size.height;
+    double screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -92,54 +116,44 @@ class _MainRhymingWordsState extends State<MainRhymingWords> with TickerProvider
           style: GoogleFonts.berkshireSwash(fontSize: 28, color: Colors.white),
         ),
         backgroundColor: Colors.pinkAccent,
-        iconTheme: IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: Colors.white), // Make back arrow white
       ),
       body: Stack(
         children: [
           Positioned.fill(
-            child: Image.asset(
-              'assets/background1.jpg',
-              fit: BoxFit.cover,
+            child: Container(
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/background1.jpg'),
+                  fit: BoxFit.cover,
+                  colorFilter: ColorFilter.mode(
+                    Colors.black.withOpacity(0.3), // Adjust the opacity here (0.0 - 1.0)
+                    BlendMode.darken, // Darken the background
+                  ),
+                ),
+              ),
             ),
           ),
+
           _isLoading
               ? Center(
-            child: CircularProgressIndicator(
-              color: Colors.pinkAccent,
-            ),
+            child: CircularProgressIndicator(color: Colors.pinkAccent),
           )
               : SlideTransition(
             position: _slideAnimation,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Container(
-                  padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20), // Padding around text
-                  decoration: BoxDecoration(
-                    color: Colors.pinkAccent.withOpacity(0.8), // Background color with opacity
-                    borderRadius: BorderRadius.circular(12), // Optional rounded corners
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.3),
-                        blurRadius: 8,
-                        offset: Offset(2, 3),
-                      ),
-                    ],
-                  ),
-                  child: Text(
-                    "Choose Difficulty",
-                    style: GoogleFonts.berkshireSwash(
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
+                Text(
+                  "Choose Difficulty",
+                  style: GoogleFonts.berkshireSwash(fontSize: screenHeight * 0.04, color: Colors.white),
                 ),
-                SizedBox(height: 20),
-                _buildDifficultyButton("Easy", Colors.greenAccent),
-                _buildDifficultyButton("Medium", Colors.orangeAccent),
-                _buildDifficultyButton("Hard", Colors.redAccent),
+                SizedBox(height: screenHeight * 0.02),
+                _buildDifficultyButton("Easy", Colors.greenAccent, screenWidth),
+                _buildDifficultyButton("Medium", Colors.orangeAccent, screenWidth),
+                _buildDifficultyButton("Hard", Colors.redAccent, screenWidth),
+                SizedBox(height: screenHeight * 0.05),
+                _buildScoreBox(screenHeight, screenWidth),
               ],
             ),
           ),
@@ -148,30 +162,51 @@ class _MainRhymingWordsState extends State<MainRhymingWords> with TickerProvider
     );
   }
 
-  Widget _buildDifficultyButton(String level, Color color) {
+  Widget _buildDifficultyButton(String level, Color color, double screenWidth) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+      padding: EdgeInsets.symmetric(vertical: 10),
       child: SizedBox(
-        width: double.infinity, // Full width button
+        width: screenWidth * 0.8,
         child: ElevatedButton(
           onPressed: () => _startGame(level),
           style: ElevatedButton.styleFrom(
-            padding: EdgeInsets.symmetric(vertical: 15),
             backgroundColor: color,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            elevation: 5,
+            padding: EdgeInsets.symmetric(vertical: 15),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
           child: Text(
             level,
-            style: GoogleFonts.berkshireSwash(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
+            style: GoogleFonts.berkshireSwash(fontSize: 22, color: Colors.white),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildScoreBox(double screenHeight, double screenWidth) {
+    return Container(
+      padding: EdgeInsets.all(screenHeight * 0.02),
+      margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+      width: screenWidth * 0.9,
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(color: Colors.black26, blurRadius: 10, spreadRadius: 2, offset: Offset(2, 2)),
+        ],
+      ),
+      child: Column(
+        children: [
+          Text(
+            "Total Score: ${getTotalScore()}",
+            style: GoogleFonts.berkshireSwash(fontSize: screenHeight * 0.03, fontWeight: FontWeight.bold, color: Colors.pinkAccent),
+          ),
+          SizedBox(height: screenHeight * 0.01),
+          Text(
+            "Easy: $_easyScore | Medium: $_mediumScore | Hard: $_hardScore",
+            style: GoogleFonts.berkshireSwash(fontSize: screenHeight * 0.025, color: Colors.black),
+          ),
+        ],
       ),
     );
   }

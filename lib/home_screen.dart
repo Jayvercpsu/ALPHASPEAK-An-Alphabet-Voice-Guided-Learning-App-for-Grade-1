@@ -166,7 +166,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   _FeatureItem(
                                     text: "Rhyming Words",
                                     imagePath: 'assets/home-screen/matching.png',
-                                    screen: MainRhymingWords(audioPlayer: widget.audioPlayer),
+                                    screen: RhymingWordsScreen(audioPlayer: widget.audioPlayer),
                                   ),
                                 ],
                                 buttonWidth,
