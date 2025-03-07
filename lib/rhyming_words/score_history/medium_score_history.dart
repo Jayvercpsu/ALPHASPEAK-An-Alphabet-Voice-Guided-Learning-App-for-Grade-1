@@ -5,17 +5,17 @@ import 'package:confetti/confetti.dart';
 import 'dart:math';
 
 
-class ScoreHistoryScreen extends StatefulWidget {
+class MediumScoreHistoryScreen extends StatefulWidget {
   final int initialScore;
   final Function resetScore; // Callback for resetting the score in the parent widget
 
-  ScoreHistoryScreen({required this.initialScore, required this.resetScore});
+  MediumScoreHistoryScreen({required this.initialScore, required this.resetScore});
 
   @override
-  _ScoreHistoryScreenState createState() => _ScoreHistoryScreenState();
+  _MediumScoreHistoryScreen createState() => _MediumScoreHistoryScreen();
 }
 
-class _ScoreHistoryScreenState extends State<ScoreHistoryScreen> {
+class _MediumScoreHistoryScreen extends State<MediumScoreHistoryScreen> {
   late int _currentScore; // Local state to manage the score
   final AudioPlayer _audioPlayer = AudioPlayer();
   late ConfettiController _confettiController;
@@ -97,7 +97,7 @@ class _ScoreHistoryScreenState extends State<ScoreHistoryScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Score History 🏆',
+          'Medium Score History 🏆',
           style: GoogleFonts.berkshireSwash(fontSize: 26, color: Colors.white),
         ),
         backgroundColor: Colors.pinkAccent,

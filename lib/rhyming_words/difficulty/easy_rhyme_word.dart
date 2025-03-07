@@ -5,19 +5,19 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:math';
 import 'package:confetti/confetti.dart';
-import 'score_history.dart';
+import '../score_history/easy_score_history.dart';
 import 'package:learn_alphabet/rhyming_words/list_rhyme/easy_list_rhyme.dart';
 
-class MatchingLettersScreen extends StatefulWidget {
+class EasyRhymeScreen extends StatefulWidget {
   final AudioPlayer audioPlayer;
 
-  MatchingLettersScreen({required this.audioPlayer});
+  EasyRhymeScreen({required this.audioPlayer});
 
   @override
-  _MatchingLettersScreenState createState() => _MatchingLettersScreenState();
+  _EasyRhymeScreen createState() => _EasyRhymeScreen();
 }
 
-class _MatchingLettersScreenState extends State<MatchingLettersScreen> {
+class _EasyRhymeScreen extends State<EasyRhymeScreen> {
   final FlutterTts flutterTts = FlutterTts();
   final Random _random = Random();
   final AudioPlayer _audioPlayer = AudioPlayer();
@@ -41,13 +41,13 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen> {
   Future<void> _loadScore() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      _score = prefs.getInt('game_score') ?? 0;
+      _score = prefs.getInt('easy_score') ?? 0; // Load Easy Score Only
     });
   }
 
   Future<void> _saveScore() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setInt('game_score', _score);
+    prefs.setInt('easy_score', _score); // Save Only Easy Score
   }
 
   Future<void> _playAudio(String path) async {
@@ -69,11 +69,11 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen> {
   }
 
   void _randomizeWords() {
-    List<String> keys = correctRhymingWords.keys.toList();
+    List<String> keys = correctRhymingWordsEasy.keys.toList();
     _targetWord = keys[_random.nextInt(keys.length)];
 
-    String correctWord = correctRhymingWords[_targetWord]!;
-    List<String> choices = [correctWord, ...wrongChoices[_targetWord]!];
+    String correctWord = correctRhymingWordsEasy[_targetWord]!;
+    List<String> choices = [correctWord, ...wrongChoicesEasy[_targetWord]!];
     choices.shuffle();
 
     _wordOptions = choices;
@@ -81,7 +81,6 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen> {
 
     setState(() {});
   }
-
 
   Future<void> _speakTargetWord() async {
     await flutterTts.speak('Find the word that rhymes with $_targetWord');
@@ -92,7 +91,7 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen> {
 
     await _audioPlayer.stop(); // Stop any currently playing audio
 
-    if (selectedWord == correctRhymingWords[_targetWord]) {
+    if (selectedWord == correctRhymingWordsEasy[_targetWord]) {
       setState(() {
         _wordStates[selectedWord] = true;
         _isAnimating = true;
@@ -109,14 +108,14 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen> {
       _isAnimating = false;
     } else {
       setState(() => _wordStates[selectedWord] = false);
-      await _playAudio('alphabet-sounds/wrong.mp3'); // Play wrong audio instantly
+      await _playAudio(
+          'alphabet-sounds/wrong.mp3'); // Play wrong audio instantly
       await flutterTts.stop(); // Stop any ongoing TTS before speaking
       flutterTts.speak('Wrong!'); // Speak "Wrong!" immediately
       await Future.delayed(Duration(milliseconds: 500));
       setState(() => _wordStates[selectedWord] = null);
     }
   }
-
 
   @override
   void dispose() {
@@ -132,7 +131,7 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen> {
       appBar: AppBar(
         backgroundColor: Colors.pinkAccent,
         title: Text(
-          'Rhyme Words ',
+          'Easy Words ',
           style: GoogleFonts.berkshireSwash(fontSize: 28, color: Colors.white),
         ),
         actions: [
@@ -141,10 +140,11 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ScoreHistoryScreen(
-                    initialScore: _score,
-                    resetScore: _resetScore,
-                  ),
+                  builder: (context) =>
+                      EasyScoreHistoryScreen(
+                        initialScore: _score,
+                        resetScore: _resetScore,
+                      ),
                 ),
               );
             },
@@ -161,17 +161,15 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen> {
             ),
           ),
         ],
-        iconTheme: IconThemeData(color: Colors.white), // ✅ Set back button color to pink
+        iconTheme: IconThemeData(
+            color: Colors.white), // ✅ Set back button color to pink
       ),
-
       body: Stack(
         children: [
           Positioned.fill(
             child: Image.asset('assets/background1.jpg', fit: BoxFit.cover),
           ),
-          if (_isLoading)
-            _buildLoadingScreen()
-          else
+          if (_isLoading) _buildLoadingScreen() else
             _buildGameScreen(),
           Align(
             alignment: Alignment.topCenter,
@@ -296,7 +294,8 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen> {
         child: Center(
           child: Text(
             word,
-            style: GoogleFonts.berkshireSwash(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
+            style: GoogleFonts.berkshireSwash(
+                fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
           ),
         ),
       ),
@@ -305,7 +304,7 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen> {
 
   Future<void> _resetScore() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove('game_score');
+    await prefs.remove('easy_score'); // Reset Easy Score Only
     setState(() {
       _score = 0;
     });

@@ -5,19 +5,19 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:math';
 import 'package:confetti/confetti.dart';
-import 'score_history.dart';
-import 'package:learn_alphabet/rhyming_words/list_rhyme/easy_list_rhyme.dart';
+import '../score_history/hard_score_history.dart';
+import 'package:learn_alphabet/rhyming_words/list_rhyme/hard_list_rhyme.dart';
 
-class MatchingLettersScreen extends StatefulWidget {
+class HardRhymeScreen extends StatefulWidget {
   final AudioPlayer audioPlayer;
 
-  MatchingLettersScreen({required this.audioPlayer});
+  HardRhymeScreen({required this.audioPlayer});
 
   @override
-  _MatchingLettersScreenState createState() => _MatchingLettersScreenState();
+  _HardRhymeScreen createState() => _HardRhymeScreen();
 }
 
-class _MatchingLettersScreenState extends State<MatchingLettersScreen> {
+class _HardRhymeScreen extends State<HardRhymeScreen> {
   final FlutterTts flutterTts = FlutterTts();
   final Random _random = Random();
   final AudioPlayer _audioPlayer = AudioPlayer();
@@ -41,13 +41,13 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen> {
   Future<void> _loadScore() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      _score = prefs.getInt('game_score') ?? 0;
+      _score = prefs.getInt('hard_score') ?? 0; // Load Hard Score Only
     });
   }
 
   Future<void> _saveScore() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setInt('game_score', _score);
+    prefs.setInt('hard_score', _score); // Save Only hard Score
   }
 
   Future<void> _playAudio(String path) async {
@@ -69,11 +69,11 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen> {
   }
 
   void _randomizeWords() {
-    List<String> keys = correctRhymingWords.keys.toList();
+    List<String> keys = correctRhymingWordsHard.keys.toList();
     _targetWord = keys[_random.nextInt(keys.length)];
 
-    String correctWord = correctRhymingWords[_targetWord]!;
-    List<String> choices = [correctWord, ...wrongChoices[_targetWord]!];
+    String correctWord = correctRhymingWordsHard[_targetWord]!;
+    List<String> choices = [correctWord, ...wrongChoicesHard[_targetWord]!];
     choices.shuffle();
 
     _wordOptions = choices;
@@ -92,7 +92,7 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen> {
 
     await _audioPlayer.stop(); // Stop any currently playing audio
 
-    if (selectedWord == correctRhymingWords[_targetWord]) {
+    if (selectedWord == correctRhymingWordsHard[_targetWord]) {
       setState(() {
         _wordStates[selectedWord] = true;
         _isAnimating = true;
@@ -132,7 +132,7 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen> {
       appBar: AppBar(
         backgroundColor: Colors.pinkAccent,
         title: Text(
-          'Rhyme Words ',
+          'Hard Words ',
           style: GoogleFonts.berkshireSwash(fontSize: 28, color: Colors.white),
         ),
         actions: [
@@ -141,7 +141,7 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ScoreHistoryScreen(
+                  builder: (context) => HardScoreHistoryScreen(
                     initialScore: _score,
                     resetScore: _resetScore,
                   ),
@@ -305,7 +305,7 @@ class _MatchingLettersScreenState extends State<MatchingLettersScreen> {
 
   Future<void> _resetScore() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove('game_score');
+    await prefs.remove('hard_score'); // Reset Hard Score Only
     setState(() {
       _score = 0;
     });
