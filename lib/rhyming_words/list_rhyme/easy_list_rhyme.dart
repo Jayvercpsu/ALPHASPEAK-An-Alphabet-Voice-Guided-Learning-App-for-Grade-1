@@ -72,6 +72,6 @@ final Map<String, List<String>> wrongChoicesEasy = {
   'plane': ['glass', 'star', 'top'],
   'rose': ['bell', 'cap', 'sun'],
   'milk': ['frog', 'top', 'ball'],
-  'star': ['sky', 'cap', 'car'],
+  'star': ['sky', 'cap', 'ban'],
   'glass': ['school', 'bird', 'pen'],
 };

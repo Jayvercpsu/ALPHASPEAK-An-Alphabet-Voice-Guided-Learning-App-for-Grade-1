@@ -19,9 +19,9 @@ class WordPuzzleScreen extends StatefulWidget {
 class _WordPuzzleScreenState extends State<WordPuzzleScreen> with SingleTickerProviderStateMixin {
   final FlutterTts _flutterTts = FlutterTts();
   String _selectedDifficulty = 'Easy';
-  int _easyScore = 0;
-  int _mediumScore = 0;
-  int _hardScore = 0;
+  int _easyPuzzleScore = 0;
+  int _mediumPuzzleScore = 0;
+  int _hardPuzzleScore = 0;
   bool _isLoading = true;
   late AnimationController _animationController;
   late Animation<Offset> _slideAnimation;
@@ -49,14 +49,14 @@ class _WordPuzzleScreenState extends State<WordPuzzleScreen> with SingleTickerPr
   Future<void> _loadScores() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      _easyScore = prefs.getInt('easy_score') ?? 0;
-      _mediumScore = prefs.getInt('medium_score') ?? 0;
-      _hardScore = prefs.getInt('hard_score') ?? 0;
+      _easyPuzzleScore = prefs.getInt('easy_word_score') ?? 0;
+      _mediumPuzzleScore = prefs.getInt('medium_word_score') ?? 0;
+      _hardPuzzleScore = prefs.getInt('hard_word_score') ?? 0;
     });
   }
 
   int getTotalScore() {
-    return _easyScore + _mediumScore + _hardScore;
+    return _easyPuzzleScore + _mediumPuzzleScore + _hardPuzzleScore;
   }
 
   final AudioPlayer _tapPlayer = AudioPlayer();
@@ -94,14 +94,14 @@ class _WordPuzzleScreenState extends State<WordPuzzleScreen> with SingleTickerPr
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       if (_selectedDifficulty == 'Easy') {
-        _easyScore += points;
-        prefs.setInt('easy_score', _easyScore);
+        _easyPuzzleScore += points;
+        prefs.setInt('easy_score', _easyPuzzleScore);
       } else if (_selectedDifficulty == 'Medium') {
-        _mediumScore += points;
-        prefs.setInt('medium_score', _mediumScore);
+        _mediumPuzzleScore += points;
+        prefs.setInt('medium_score', _mediumPuzzleScore);
       } else if (_selectedDifficulty == 'Hard') {
-        _hardScore += points;
-        prefs.setInt('hard_score', _hardScore);
+        _hardPuzzleScore += points;
+        prefs.setInt('hard_score', _hardPuzzleScore);
       }
     });
   }
@@ -109,9 +109,9 @@ class _WordPuzzleScreenState extends State<WordPuzzleScreen> with SingleTickerPr
   void _resetScores() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      _easyScore = 0;
-      _mediumScore = 0;
-      _hardScore = 0;
+      _easyPuzzleScore = 0;
+      _mediumPuzzleScore = 0;
+      _hardPuzzleScore = 0;
     });
 
     prefs.setInt('easy_score', 0);
@@ -222,7 +222,7 @@ class _WordPuzzleScreenState extends State<WordPuzzleScreen> with SingleTickerPr
           ),
           SizedBox(height: screenHeight * 0.01),
           Text(
-            "Easy: $_easyScore | Medium: $_mediumScore | Hard: $_hardScore",
+            "Easy: $_easyPuzzleScore | Medium: $_mediumPuzzleScore | Hard: $_hardPuzzleScore",
             style: GoogleFonts.poppins(fontSize: screenHeight * 0.025, color: Colors.black),
           ),
         ],

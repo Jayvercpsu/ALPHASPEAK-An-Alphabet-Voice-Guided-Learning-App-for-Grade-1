@@ -5,6 +5,7 @@ import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:confetti/confetti.dart';
 import 'dart:async';
 
+
 class VowelScreenDetails extends StatefulWidget {
   final String vowel;
 
@@ -95,46 +96,65 @@ class _VowelScreenDetailsState extends State<VowelScreenDetails> {
   }
 
   void _startListening(String word) async {
-    await _speechToText.listen(
-      onResult: (result) {
-        setState(() {
-          _spokenWord = result.recognizedWords;
-        });
-
-        if (result.finalResult) {
-          _checkPronunciation(word);
-        }
-      },
-      localeId: 'en_US',
-    );
-
-    Timer(Duration(seconds: 10), () {
-      if (_spokenWord.isEmpty) {
-        _speechToText.stop();
-        setState(() {
-          _showMic = false;
-        });
-        _showMessage("Time's up! Try again.", Colors.red);
-      }
+    setState(() {
+      _showMic = true;
+      _spokenWord = '';
     });
+
+    bool available = await _speechToText.initialize();
+    if (available) {
+      _speechToText.listen(
+        onResult: (result) {
+          setState(() {
+            _spokenWord = result.recognizedWords;
+          });
+
+          if (result.finalResult) {
+            _checkPronunciation(word);
+          }
+        },
+        localeId: 'en_US',
+      );
+
+      Timer.periodic(Duration(seconds: 1), (timer) {
+        if (!_showMic) {
+          timer.cancel();
+        }
+
+        if (_spokenWord.isNotEmpty) {
+          setState(() {
+            _showMic = true;
+          });
+        }
+
+        if (timer.tick == 10 && _spokenWord.isEmpty) {
+          timer.cancel();
+          _speechToText.stop();
+          setState(() {
+            _showMic = false;
+          });
+          _showMessage("Time's up! Try again.", Colors.red);
+        }
+      });
+    }
   }
 
-  void _checkPronunciation(String word) async {
+  void _checkPronunciation(String word) {
     if (_spokenWord.toLowerCase() == word.toLowerCase()) {
       _showMessage('Correct! 🎉', Colors.green);
       _confettiController.play();
-      await flutterTts.speak('Correct!');
     } else {
       _showMessage('Incorrect! Try again.', Colors.red);
-      await flutterTts.speak('Incorrect! Try again.');
+      Future.delayed(Duration(seconds: 2), () {
+        _startListening(word); // Automatically restart if wrong
+      });
     }
 
     setState(() {
-      _countdowns[word] = 0;
-      _currentWord = '';
       _showMic = false;
     });
   }
+
 
   void _showMessage(String message, Color color) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -160,22 +180,11 @@ class _VowelScreenDetailsState extends State<VowelScreenDetails> {
           style: GoogleFonts.poppins(fontSize: 28, color: Colors.white),
         ),
         backgroundColor: Colors.pinkAccent,
-        iconTheme: IconThemeData(color: Colors.white),
       ),
       body: Stack(
         children: [
           Positioned.fill(
             child: Image.asset('assets/background1.jpg', fit: BoxFit.cover),
-          ),
-          Align(
-            alignment: Alignment.topCenter,
-            child: ConfettiWidget(
-              confettiController: _confettiController,
-              blastDirection: 3.14 / 2,
-              emissionFrequency: 0.05,
-              numberOfParticles: 20,
-              gravity: 0.3,
-            ),
           ),
           ListView(
             padding: EdgeInsets.all(20),
@@ -189,24 +198,52 @@ class _VowelScreenDetailsState extends State<VowelScreenDetails> {
                   color: Colors.pinkAccent,
                 ),
               ),
-              IconButton(
-                icon: Icon(Icons.volume_up, size: 50, color: Colors.pinkAccent),
-                onPressed: () => _speak(widget.vowel),
-              ),
-              SizedBox(height: 20),
               Column(
                 children: words.map((word) => _wordTile(word)).toList(),
               ),
-              if (_showMic)
-                Center(
-                  child: Icon(
-                    Icons.mic,
-                    size: 100,
-                    color: Colors.redAccent,
-                  ),
-                ),
             ],
           ),
+          if (_showMic)
+            Center(
+              child: Container(
+                padding: EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.8),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.mic,
+                      size: _spokenWord.isNotEmpty ? 120 : 100,
+                      color: _spokenWord.isNotEmpty ? Colors.green : Colors.redAccent,
+                    ),
+                    SizedBox(height: 10),
+                    Text(
+                      _spokenWord.isEmpty ? "Waiting..." : _spokenWord,
+                      style: GoogleFonts.poppins(
+                        fontSize: 22,
+                        color: _spokenWord.toLowerCase() == _currentWord.toLowerCase()
+                            ? Colors.green
+                            : Colors.red,
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: () {
+                        _speechToText.stop();
+                        setState(() {
+                          _showMic = false;
+                        });
+                      },
+                      child: Text("Stop"),
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                    ),
+                  ],
+                ),
+              ),
+            ),
         ],
       ),
     );

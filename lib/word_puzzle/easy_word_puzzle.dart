@@ -81,13 +81,13 @@ class _EasyWordPuzzleScreenState extends State<EasyWordPuzzleScreen> with Single
   Future<void> _loadScore() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      _score = prefs.getInt('easy_score') ?? 0;
+      _score = prefs.getInt('easy_word_score') ?? 0;
     });
   }
 
   Future<void> _saveScore() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setInt('easy_score', _score);
+    prefs.setInt('easy_word_score', _score);
   }
 
   void _resetScore() async {

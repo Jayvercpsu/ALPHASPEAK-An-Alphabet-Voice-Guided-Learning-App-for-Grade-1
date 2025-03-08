@@ -85,13 +85,13 @@ class _MediumWordPuzzleScreenState extends State<MediumWordPuzzleScreen> with Si
   Future<void> _loadScore() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      _score = prefs.getInt('medium_score') ?? 0;
+      _score = prefs.getInt('medium_word_score') ?? 0;
     });
   }
 
   Future<void> _saveScore() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setInt('medium_score', _score);
+    prefs.setInt('medium_word_score', _score);
   }
 
   void _resetScore() async {

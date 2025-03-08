@@ -20,6 +20,7 @@ dependencies:
   animate_do: ^3.3.9
   confetti: ^0.8.0
   shared_preferences: ^2.5.2
+  wave: ^0.2.2
 
 dev_dependencies:
   flutter_test:

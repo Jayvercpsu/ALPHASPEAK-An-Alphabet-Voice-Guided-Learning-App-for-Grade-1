@@ -132,7 +132,7 @@ class _VowelScreenState extends State<VowelScreen> with TickerProviderStateMixin
             child: Text(
               letter,
               style: GoogleFonts.poppins(
-                fontSize: 80,
+                fontSize: 65,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
                 shadows: [
