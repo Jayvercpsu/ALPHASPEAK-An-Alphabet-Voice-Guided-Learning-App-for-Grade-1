@@ -92,4 +92,5 @@ flutter:
     - assets/stories/tryagain.gif
     - assets/stories/sound/gameover.mp3
     - assets/stories/sound/win.mp3
+    - assets/btn_home.png
 

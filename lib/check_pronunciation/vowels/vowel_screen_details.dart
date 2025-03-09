@@ -3,8 +3,9 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:confetti/confetti.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
-
+import 'package:audioplayers/audioplayers.dart';
 
 class VowelScreenDetails extends StatefulWidget {
   final String vowel;
@@ -24,6 +25,7 @@ class _VowelScreenDetailsState extends State<VowelScreenDetails> {
   String _currentWord = '';
   bool _showMic = false;
   late ConfettiController _confettiController;
+  int _totalScore = 0;
 
   final Map<String, List<String>> vowelWords = {
     '/a/': ['cat', 'bat', 'sat', 'mat', 'rat', 'hat'],
@@ -33,6 +35,8 @@ class _VowelScreenDetailsState extends State<VowelScreenDetails> {
     '/u/': ['mud', 'hug', 'tub', 'sub', 'rub', 'cup'],
   };
 
+  final AudioPlayer _audioPlayer = AudioPlayer();
+
   @override
   void initState() {
     super.initState();
@@ -40,6 +44,7 @@ class _VowelScreenDetailsState extends State<VowelScreenDetails> {
     _initializeTTS();
     _initializeSpeech();
     _initializeCountdowns();
+    _loadScore();
   }
 
   @override
@@ -54,6 +59,12 @@ class _VowelScreenDetailsState extends State<VowelScreenDetails> {
     flutterTts.setLanguage("en-US");
     flutterTts.setPitch(1.2);
     flutterTts.setSpeechRate(0.5);
+    flutterTts.awaitSpeakCompletion(true);
+  }
+
+  Future<void> _speak(String text) async {
+    await flutterTts.speak(text);
+    await flutterTts.awaitSpeakCompletion(true);
   }
 
   void _initializeSpeech() async {
@@ -68,8 +79,19 @@ class _VowelScreenDetailsState extends State<VowelScreenDetails> {
     }
   }
 
-  void _speak(String text) async {
-    await flutterTts.speak(text);
+  Future<void> _loadScore() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _totalScore = prefs.getInt('vowel_score') ?? 0;
+    });
+  }
+
+  Future<void> _updateScore() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _totalScore += 1;
+    });
+    await prefs.setInt('vowel_score', _totalScore);
   }
 
   void _startCountdown(String word) {
@@ -88,9 +110,14 @@ class _VowelScreenDetailsState extends State<VowelScreenDetails> {
       if (_countdowns[word] == 0) {
         timer.cancel();
         setState(() {
-          _showMic = true;
+          _spokenWord = "Say the word: $word";
         });
-        _startListening(word);
+        _speak("Say the word: $word").then((_) {
+          setState(() {
+            _showMic = true; // ✅ Mic appears after speaking
+          });
+          _startListening(word);
+        });
       }
     });
   }
@@ -101,59 +128,62 @@ class _VowelScreenDetailsState extends State<VowelScreenDetails> {
       _spokenWord = '';
     });
 
-    bool available = await _speechToText.initialize();
-    if (available) {
-      _speechToText.listen(
-        onResult: (result) {
+    if (!_speechToText.isAvailable) {
+      await _speechToText.initialize();
+    }
+
+    _speechToText.listen(
+      onResult: (result) {
+        String recognized = result.recognizedWords.toLowerCase();
+        if (recognized.isNotEmpty && _spokenWord != recognized) {
+          _speechToText.stop(); // ✅ Stop listening immediately to prevent duplicate triggers
           setState(() {
-            _spokenWord = result.recognizedWords;
+            _spokenWord = recognized;
           });
-
-          if (result.finalResult) {
-            _checkPronunciation(word);
-          }
-        },
-        localeId: 'en_US',
-      );
-
-      Timer.periodic(Duration(seconds: 1), (timer) {
-        if (!_showMic) {
-          timer.cancel();
+          _checkPronunciation(word, recognized);
         }
+      },
+      localeId: 'en_US',
+    );
+  }
 
-        if (_spokenWord.isNotEmpty) {
-          setState(() {
-            _showMic = true;
-          });
-        }
+  void _checkPronunciation(String word, String recognizedWord) async {
+    if (!mounted) return; // ✅ Prevent UI updates if widget is disposed
 
-        if (timer.tick == 10 && _spokenWord.isEmpty) {
-          timer.cancel();
-          _speechToText.stop();
-          setState(() {
-            _showMic = false;
-          });
-          _showMessage("Time's up! Try again.", Colors.red);
-        }
-      });
+    if (recognizedWord == word.toLowerCase()) {
+      _displayFeedback('Correct! 🎉', Colors.green, "Correct! Good Job!", 'alphabet-sounds/correct.mp3');
+      _confettiController.play();
+      _updateScore();
+    } else {
+      _displayFeedback('Incorrect! ❌ Try again.', Colors.red, "Incorrect! Please try again.", 'alphabet-sounds/wrong.mp3');
+
+      // ✅ Small delay before restarting listening to prevent instant repeat
+      Future.delayed(Duration(milliseconds: 500), () => _startListening(word));
     }
   }
 
-  void _checkPronunciation(String word) {
-    if (_spokenWord.toLowerCase() == word.toLowerCase()) {
-      _showMessage('Correct! 🎉', Colors.green);
-      _confettiController.play();
-    } else {
-      _showMessage('Incorrect! Try again.', Colors.red);
-      Future.delayed(Duration(seconds: 2), () {
-        _startListening(word); // Automatically restart if wrong
-      });
-    }
+  void _displayFeedback(String message, Color color, String ttsMessage, String sound) async {
+    if (!mounted) return;
 
     setState(() {
-      _showMic = false;
+      ScaffoldMessenger.of(context).hideCurrentSnackBar(); // ✅ Clear previous message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            message,
+            style: GoogleFonts.poppins(fontSize: 18, color: Colors.white),
+          ),
+          backgroundColor: color,
+          duration: Duration(seconds: 2),
+        ),
+      );
     });
+
+    _speak(ttsMessage);
+    await _audioPlayer.play(AssetSource(sound));
   }
+
+
 
 
   void _showMessage(String message, Color color) {
@@ -180,6 +210,22 @@ class _VowelScreenDetailsState extends State<VowelScreenDetails> {
           style: GoogleFonts.poppins(fontSize: 28, color: Colors.white),
         ),
         backgroundColor: Colors.pinkAccent,
+        iconTheme: IconThemeData(color: Colors.white),
+        actions: [
+          Padding(
+            padding: EdgeInsets.only(right: 20),
+            child: Row(
+              children: [
+                Icon(Icons.star, color: Colors.yellow, size: 30),
+                SizedBox(width: 5),
+                Text(
+                  '$_totalScore',
+                  style: GoogleFonts.poppins(fontSize: 24, color: Colors.white),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
       body: Stack(
         children: [
@@ -203,47 +249,6 @@ class _VowelScreenDetailsState extends State<VowelScreenDetails> {
               ),
             ],
           ),
-          if (_showMic)
-            Center(
-              child: Container(
-                padding: EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.8),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.mic,
-                      size: _spokenWord.isNotEmpty ? 120 : 100,
-                      color: _spokenWord.isNotEmpty ? Colors.green : Colors.redAccent,
-                    ),
-                    SizedBox(height: 10),
-                    Text(
-                      _spokenWord.isEmpty ? "Waiting..." : _spokenWord,
-                      style: GoogleFonts.poppins(
-                        fontSize: 22,
-                        color: _spokenWord.toLowerCase() == _currentWord.toLowerCase()
-                            ? Colors.green
-                            : Colors.red,
-                      ),
-                    ),
-                    SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: () {
-                        _speechToText.stop();
-                        setState(() {
-                          _showMic = false;
-                        });
-                      },
-                      child: Text("Stop"),
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                    ),
-                  ],
-                ),
-              ),
-            ),
         ],
       ),
     );
@@ -253,37 +258,59 @@ class _VowelScreenDetailsState extends State<VowelScreenDetails> {
     return Card(
       margin: EdgeInsets.symmetric(vertical: 10),
       color: Colors.white.withOpacity(0.9),
-      child: ListTile(
-        leading: Icon(Icons.volume_up, color: Colors.pinkAccent),
-        title: Text(
-          word,
-          style: GoogleFonts.poppins(fontSize: 24, color: Colors.black),
-        ),
-        trailing: ElevatedButton(
-          onPressed: () => _startCountdown(word),
-          child: _currentWord == word && _countdowns[word]! > 0
-              ? Text(
-            '${_countdowns[word]}',
-            style: GoogleFonts.poppins(
-              fontSize: 24,
-              color: Colors.white,
+      child: Column(
+        children: [
+          ListTile(
+            leading: IconButton(
+              icon: Icon(Icons.volume_up, color: Colors.pinkAccent),
+              onPressed: () => _speak(word),
             ),
-          )
-              : Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.mic, color: Colors.white),
-              SizedBox(width: 5),
-              Text('Speak', style: GoogleFonts.poppins(fontSize: 18, color: Colors.white)),
-            ],
-          ),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.pinkAccent,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+            title: Text(
+              word,
+              style: GoogleFonts.poppins(fontSize: 24, color: Colors.black),
+            ),
+            trailing: ElevatedButton(
+              onPressed: () => _startCountdown(word),
+              child: _currentWord == word && _countdowns[word]! > 0
+                  ? Text(
+                '${_countdowns[word]}',
+                style: GoogleFonts.poppins(fontSize: 24, color: Colors.white),
+              )
+                  : Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.mic, color: Colors.white),
+                  SizedBox(width: 5),
+                  Text('Speak', style: GoogleFonts.poppins(
+                      fontSize: 18, color: Colors.white)),
+                ],
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.pinkAccent,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+              ),
             ),
           ),
-        ),
+          if (_currentWord == word && _spokenWord.isNotEmpty &&
+              !_spokenWord.startsWith("Say the word"))
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 10),
+              child: Column(
+                children: [
+                  Text(
+                    _spokenWord,
+                    // ✅ Only spoken word displayed, no "Say the word"
+                    style: GoogleFonts.poppins(
+                        fontSize: 20, color: Colors.pinkAccent),
+                    textAlign: TextAlign.center,
+                  ),
+                  Icon(Icons.mic, size: 40, color: Colors.pinkAccent),
+                  // ✅ Mic always visible below spoken word
+                ],
+              ),
+            ),
+        ],
       ),
     );
   }
