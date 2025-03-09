@@ -6,6 +6,7 @@ import 'package:confetti/confetti.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:avatar_glow/avatar_glow.dart';
 
 class VowelScreenDetails extends StatefulWidget {
   final String vowel;
@@ -99,7 +100,7 @@ class _VowelScreenDetailsState extends State<VowelScreenDetails> {
       _currentWord = word;
       _countdowns[word] = 3;
       _spokenWord = '';
-      _showMic = false;
+      _showMic = false; // ✅ Hide mic initially
     });
 
     Timer.periodic(Duration(seconds: 1), (timer) {
@@ -109,18 +110,17 @@ class _VowelScreenDetailsState extends State<VowelScreenDetails> {
 
       if (_countdowns[word] == 0) {
         timer.cancel();
-        setState(() {
-          _spokenWord = "Say the word: $word";
-        });
         _speak("Say the word: $word").then((_) {
           setState(() {
-            _showMic = true; // ✅ Mic appears after speaking
+            _showMic = true; // ✅ Mic appears AFTER TTS finishes
           });
           _startListening(word);
         });
       }
     });
   }
+
+
 
   void _startListening(String word) async {
     setState(() {
@@ -281,32 +281,31 @@ class _VowelScreenDetailsState extends State<VowelScreenDetails> {
                 children: [
                   Icon(Icons.mic, color: Colors.white),
                   SizedBox(width: 5),
-                  Text('Speak', style: GoogleFonts.poppins(
-                      fontSize: 18, color: Colors.white)),
+                  Text('Speak', style: GoogleFonts.poppins(fontSize: 18, color: Colors.white)),
                 ],
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.pinkAccent,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
           ),
-          if (_currentWord == word && _spokenWord.isNotEmpty &&
-              !_spokenWord.startsWith("Say the word"))
+          if (_currentWord == word)
             Padding(
               padding: EdgeInsets.symmetric(vertical: 10),
               child: Column(
                 children: [
-                  Text(
-                    _spokenWord,
-                    // ✅ Only spoken word displayed, no "Say the word"
-                    style: GoogleFonts.poppins(
-                        fontSize: 20, color: Colors.pinkAccent),
-                    textAlign: TextAlign.center,
+                  if (_spokenWord.isNotEmpty && !_spokenWord.startsWith("Say the word"))
+                    Text(
+                      _spokenWord,
+                      style: GoogleFonts.poppins(fontSize: 20, color: Colors.pinkAccent),
+                      textAlign: TextAlign.center,
+                    ),
+                  AvatarGlow(
+                    glowColor: Colors.pinkAccent,
+                    animate: _showMic, // ✅ Mic glows while listening
+                    child: Icon(Icons.mic, size: 40, color: Colors.pinkAccent),
                   ),
-                  Icon(Icons.mic, size: 40, color: Colors.pinkAccent),
-                  // ✅ Mic always visible below spoken word
                 ],
               ),
             ),
@@ -314,4 +313,5 @@ class _VowelScreenDetailsState extends State<VowelScreenDetails> {
       ),
     );
   }
+
 }

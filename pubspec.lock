@@ -90,7 +90,7 @@ packages:
     source: hosted
     version: "4.0.0"
   avatar_glow:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: avatar_glow
       sha256: "848d9a85065e398241d8ffae0dcc50902980c24490aef21fd4c6b6342d4c26b4"
