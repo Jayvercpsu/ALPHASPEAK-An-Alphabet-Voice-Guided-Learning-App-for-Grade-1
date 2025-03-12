@@ -37,6 +37,7 @@ flutter_icons:
 flutter:
   uses-material-design: true
   assets:
+    - assets/alphabet-sounds/tap.mp3
     - assets/background1.jpg
     - assets/bg_music.mp3
     - assets/mute.png
@@ -47,6 +48,9 @@ flutter:
     - assets/word_puzzle/drop.mp3
     - assets/word_puzzle/correct.mp3
     - assets/word_puzzle/drop.mp3
+    - assets/rhyming_words/applause_excellent.mp3
+    - assets/rhyming_words/applause_greatjob.mp3
+    - assets/rhyming_words/applause_youdid.mp3
     - assets/backgroundimage.jpg
     - assets/alphabets/a.png
     - assets/alphabets/b.png
@@ -75,7 +79,7 @@ flutter:
     - assets/alphabets/y.png
     - assets/alphabets/z.png
     - assets/home-screen/abc.png
-    - assets/home-screen/matching.png
+    - assets/home-screen/rhyming.png
     - assets/home-screen/voice.png
     - assets/home-screen/puzzle.png
     - assets/home-screen/stories.png
@@ -83,7 +87,6 @@ flutter:
     - assets/alphabet-sounds/
     - assets/alphabet-sounds/wrong.mp3
     - assets/alphabet-sounds/correct.mp3
-    - assets/alphabet-sounds/tap.mp3
     - assets/all-letters/
     - assets/cpsu-logo.png
     - assets/client-logo.png

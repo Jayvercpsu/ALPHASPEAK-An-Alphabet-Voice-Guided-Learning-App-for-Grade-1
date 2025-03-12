@@ -2,7 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'all_alphabet/alphabet/main_alphabet.dart';
+import 'all_alphabet/alphabet/alphabet_screen.dart';
 import 'rhyming_words/main_rhyming_words.dart';
 import 'check_pronunciation/vowels/vowel_screen.dart';
 import 'word_puzzle/word_puzzle.dart';
@@ -161,11 +161,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                   _FeatureItem(
                                     text: "Learn Alphabet",
                                     imagePath: 'assets/home-screen/abc.png',
-                                    screen: MainAlphabet(audioPlayer: widget.audioPlayer),
+                                    screen: AlphabetScreen(audioPlayer: widget.audioPlayer),
                                   ),
                                   _FeatureItem(
                                     text: "Rhyming Words",
-                                    imagePath: 'assets/home-screen/matching.png',
+                                    imagePath: 'assets/home-screen/rhyming.png',
                                     screen: RhymingWordsScreen(audioPlayer: widget.audioPlayer),
                                   ),
                                 ],

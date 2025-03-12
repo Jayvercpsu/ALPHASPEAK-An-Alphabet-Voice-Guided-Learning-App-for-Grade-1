@@ -126,7 +126,7 @@ class _AlphabetScreenState extends State<AlphabetScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Learn Alphabets',
+          'Learn Alphabets 📖',
           style: GoogleFonts.poppins(fontSize: 26, color: Colors.white),
         ),
         iconTheme: IconThemeData(color: Colors.white),
