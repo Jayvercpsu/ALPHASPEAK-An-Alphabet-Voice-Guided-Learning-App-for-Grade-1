@@ -91,7 +91,6 @@ class _VowelScreenState extends State<VowelScreen> with TickerProviderStateMixin
 
   void _handleTap(String letter) async {
     await _playTapSound(); // Play tap sound when tapping tile
-    await flutterTts.speak(letter);
     _animationControllers[letter]?.reverse();
     _navigateToDetails(letter);
   }

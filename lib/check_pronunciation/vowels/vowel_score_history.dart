@@ -11,7 +11,7 @@ class VowelScoreHistory extends StatefulWidget {
 }
 
 class _VowelScoreHistoryState extends State<VowelScoreHistory> {
-  int _totalScore = 0;
+  Map<String, int> _scores = {'/a/': 0, '/e/': 0, '/i/': 0, '/o/': 0, '/u/': 0};
   late ConfettiController _confettiController;
   final AudioPlayer _audioPlayer = AudioPlayer(); // Tap Sound Player
 
@@ -19,7 +19,7 @@ class _VowelScoreHistoryState extends State<VowelScoreHistory> {
   void initState() {
     super.initState();
     _confettiController = ConfettiController(duration: Duration(seconds: 2));
-    _loadScore();
+    _loadScores();
   }
 
   @override
@@ -29,27 +29,37 @@ class _VowelScoreHistoryState extends State<VowelScoreHistory> {
     super.dispose();
   }
 
-  Future<void> _loadScore() async {
+  Future<void> _loadScores() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      _totalScore = prefs.getInt('vowel_score') ?? 0;
+      _scores = {
+        '/a/': prefs.getInt('score_/a/') ?? 0,
+        '/e/': prefs.getInt('score_/e/') ?? 0,
+        '/i/': prefs.getInt('score_/i/') ?? 0,
+        '/o/': prefs.getInt('score_/o/') ?? 0,
+        '/u/': prefs.getInt('score_/u/') ?? 0,
+      };
     });
   }
 
-  Future<void> _resetScore() async {
-    await _playTapSound(); // Play Tap Sound
+  Future<void> _resetScores() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('vowel_score', 0);
+    await prefs.remove('score_/a/');
+    await prefs.remove('score_/e/');
+    await prefs.remove('score_/i/');
+    await prefs.remove('score_/o/');
+    await prefs.remove('score_/u/');
     setState(() {
-      _totalScore = 0;
+      _scores = {'/a/': 0, '/e/': 0, '/i/': 0, '/o/': 0, '/u/': 0};
     });
     _confettiController.play();
-    _showMessage("Score Reset Successfully!");
   }
+
 
   Future<void> _playTapSound() async {
     await _audioPlayer.stop(); // Stop Previous Sound
-    await _audioPlayer.play(AssetSource('alphabet-sounds/tap.mp3')); // Play Tap Sound
+    await _audioPlayer
+        .play(AssetSource('alphabet-sounds/tap.mp3')); // Play Tap Sound
   }
 
   void _showMessage(String message) {
@@ -91,7 +101,7 @@ class _VowelScoreHistoryState extends State<VowelScoreHistory> {
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              _resetScore();
+              _resetScores();
             },
             child: Text(
               'Reset',
@@ -103,76 +113,76 @@ class _VowelScoreHistoryState extends State<VowelScoreHistory> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Vowel Score History',
-          style: GoogleFonts.poppins(fontSize: 28, color: Colors.white),
+    @override
+    Widget build(BuildContext context) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(
+            'Vowel Score History',
+            style: GoogleFonts.poppins(fontSize: 28, color: Colors.white),
+          ),
+          backgroundColor: Colors.pinkAccent,
+          iconTheme: IconThemeData(color: Colors.white),
         ),
-        backgroundColor: Colors.pinkAccent,
-        iconTheme: IconThemeData(color: Colors.white),
-      ),
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: Image.asset('assets/background1.jpg', fit: BoxFit.cover),
-          ),
-          Align(
-            alignment: Alignment.topCenter,
-            child: ConfettiWidget(
-              confettiController: _confettiController,
-              blastDirection: pi / 2,
-              emissionFrequency: 0.05,
-              numberOfParticles: 20,
-              gravity: 0.3,
+        body: Stack(
+          children: [
+            Positioned.fill(
+              child: Image.asset('assets/background1.jpg', fit: BoxFit.cover),
             ),
-          ),
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'Your Total Score',
-                  style: GoogleFonts.poppins(
-                    fontSize: 30,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                SizedBox(height: 20),
-                Text(
-                  '$_totalScore',
-                  style: GoogleFonts.poppins(
-                    fontSize: 60,
-                    color: Colors.pinkAccent,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 30),
-                ElevatedButton(
-                  onPressed: _showConfirmationDialog,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.redAccent,
-                    padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: Text(
-                    'Reset Score',
+            Align(
+              alignment: Alignment.topCenter,
+              child: ConfettiWidget(
+                confettiController: _confettiController,
+                blastDirection: pi / 2,
+                emissionFrequency: 0.05,
+                numberOfParticles: 20,
+                gravity: 0.3,
+              ),
+            ),
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Your Total Score',
                     style: GoogleFonts.poppins(
-                      fontSize: 20,
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
                   ),
-                ),
-              ],
+                  SizedBox(height: 20),
+                  Text(
+                    '${_scores.values.reduce((a, b) => a + b)}',
+                    style: GoogleFonts.poppins(
+                      fontSize: 60,
+                      color: Colors.pinkAccent,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 30),
+                  ElevatedButton(
+                    onPressed: _showConfirmationDialog,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.redAccent,
+                      padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      'Reset Score',
+                      style: GoogleFonts.poppins(
+                        fontSize: 20,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+      );
+    }
   }
-}
