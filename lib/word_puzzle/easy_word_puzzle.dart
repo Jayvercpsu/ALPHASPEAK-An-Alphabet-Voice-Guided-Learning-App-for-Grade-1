@@ -32,20 +32,16 @@ class _EasyWordPuzzleScreenState extends State<EasyWordPuzzleScreen> with Single
   late AudioPlayer _soundPlayer;
   late AnimationController _animationController;
   late Animation<Offset> _slideAnimation;
-
+  bool _gameCompleted = false; // Track if game is completed
 
   @override
   void initState() {
     super.initState();
-
     _confettiController = ConfettiController(duration: Duration(seconds: 2));
     _soundPlayer = AudioPlayer();
-
     _startLoading();
     _initializeTTS();
     _loadScore();
-
-
     _animationController = AnimationController(vsync: this, duration: Duration(milliseconds: 800));
   }
 
@@ -66,14 +62,16 @@ class _EasyWordPuzzleScreenState extends State<EasyWordPuzzleScreen> with Single
   List<bool?> _isCorrect = [];
 
   void _initializePuzzle() async {
+    // Prevent TTS and puzzle setup if game is completed
+    if (_gameCompleted) return;
+
     setState(() {
       _targetWord = (_words..shuffle()).first;
       _scrambledLetters = _targetWord.split('')..shuffle();
       _userWordLetters = List.filled(_targetWord.length, '');
       _slotColors = List.filled(_targetWord.length, Colors.grey);
-      _isCorrect = List.filled(_targetWord.length, null); // Initialize _isCorrect
+      _isCorrect = List.filled(_targetWord.length, null);
     });
-
 
     await _flutterTts.speak("Arrange the letters for $_targetWord");
   }
@@ -82,12 +80,13 @@ class _EasyWordPuzzleScreenState extends State<EasyWordPuzzleScreen> with Single
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       _score = prefs.getInt('easy_word_score') ?? 0;
+      _gameCompleted = _score >= 15; // Check if game is already completed
     });
   }
 
   Future<void> _saveScore() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setInt('easy_word_score', _score);
+    await prefs.setInt('easy_word_score', _score);
   }
 
   void _resetScore() async {
@@ -95,10 +94,13 @@ class _EasyWordPuzzleScreenState extends State<EasyWordPuzzleScreen> with Single
     if (confirmReset) {
       setState(() {
         _score = 0;
+        _gameCompleted = false;
       });
       await _saveScore();
+      _initializePuzzle(); // TTS is already handled here
     }
   }
+
 
   Future<bool> _showConfirmationDialog() async {
     return await showDialog(
@@ -123,8 +125,92 @@ class _EasyWordPuzzleScreenState extends State<EasyWordPuzzleScreen> with Single
     return _userWordLetters.join('') == _targetWord;
   }
 
+  void _showCompletionDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Prevent dismissing by tapping outside
+      builder: (context) => AlertDialog(
+        title: Text("Congratulations!", style: GoogleFonts.poppins(fontSize: 24, color: Colors.pinkAccent)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text("You've completed all 15 puzzles!", style: GoogleFonts.poppins(fontSize: 18)),
+            SizedBox(height: 20),
+            Image.asset('assets/stories/trophy.gif', width: 100),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // Close dialog
+              Navigator.pop(context); // Go back to previous screen
+            },
+            child: Text("Back", style: GoogleFonts.poppins(fontSize: 18)),
+          ),
+          TextButton(
+            onPressed: () {
+              _resetScore();
+              Navigator.pop(context); // Close dialog
+            },
+            child: Text("New Game", style: GoogleFonts.poppins(fontSize: 18, color: Colors.pinkAccent)),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (_gameCompleted) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text('Easy Word Puzzle 🎈', style: GoogleFonts.poppins(fontSize: 28, color: Colors.white)),
+          backgroundColor: Colors.pinkAccent,
+          iconTheme: IconThemeData(color: Colors.white),
+        ),
+        body: Stack(
+          children: [
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  image: DecorationImage(image: AssetImage('assets/background1.jpg'), fit: BoxFit.cover),
+                ),
+                child: Container(color: Colors.black.withOpacity(0.2)),
+              ),
+            ),
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text("Congratulations!", style: GoogleFonts.poppins(fontSize: 36, color: Colors.white, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 20),
+                  Text("You've completed all 15 puzzles!", style: GoogleFonts.poppins(fontSize: 24, color: Colors.white)),
+                  SizedBox(height: 40),
+                  ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text("Back to Menu", style: GoogleFonts.poppins(fontSize: 22)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.pinkAccent,
+                      padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: _resetScore,
+                    child: Text("New Game", style: GoogleFonts.poppins(fontSize: 22)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueAccent,
+                      padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Easy Word Puzzle 🎈', style: GoogleFonts.poppins(fontSize: 28, color: Colors.white)),
@@ -163,7 +249,7 @@ class _EasyWordPuzzleScreenState extends State<EasyWordPuzzleScreen> with Single
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text("Score: $_score", style: GoogleFonts.poppins(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.yellow)),
+                Text("Score: $_score/15", style: GoogleFonts.poppins(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.yellow)),
                 _buildWordSlots(),
                 _buildScrambledLetters(),
                 _buildResetButton(),
@@ -215,55 +301,63 @@ class _EasyWordPuzzleScreenState extends State<EasyWordPuzzleScreen> with Single
               width: 65,
               height: 75,
               decoration: BoxDecoration(
-                color: _isCorrect[index] == true ? Colors.blue.withOpacity(0.8) : Colors.white, // Blue background with transparency
+                color: _isCorrect[index] == true ? Colors.blue.withOpacity(0.8) : Colors.white,
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
-                  color: _isCorrect[index] == true ? Colors.blue : _slotColors[index], // Blue border if correct
+                  color: _isCorrect[index] == true ? Colors.blue : _slotColors[index],
                   width: 3,
                 ),
               ),
               alignment: Alignment.center,
               child: Text(
-                _userWordLetters[index].isNotEmpty ? _userWordLetters[index] : _targetWord[index], // Show outline letter always
+                _userWordLetters[index].isNotEmpty ? _userWordLetters[index] : _targetWord[index],
                 style: TextStyle(
                   fontSize: 36,
                   fontWeight: FontWeight.bold,
-                  color: _userWordLetters[index].isNotEmpty ? Colors.white : Colors.black12, // White if answered, black outline if not
+                  color: _userWordLetters[index].isNotEmpty ? Colors.white : Colors.black12,
                 ),
               ),
             );
           },
-            onAccept: (letter) async {
-              setState(() {
-                if (letter == _targetWord[index]) {
-                  _userWordLetters[index] = letter;
-                  _scrambledLetters.remove(letter);
-                  _slotColors[index] = Colors.blue; // Blue background for correct answers
-                  _isCorrect[index] = true; // Mark correct
-                  _playSound('word_puzzle/drop.mp3'); // Drop Sound for correct letters
-                } else {
-                  _slotColors[index] = Colors.red; // Red background for wrong answers
-                  _isCorrect[index] = false; // Mark wrong
-                  _playSound('alphabet-sounds/wrong.mp3'); // Wrong Sound
-                }
-              });
+          onAccept: (letter) async {
+            setState(() {
+              if (letter == _targetWord[index]) {
+                _userWordLetters[index] = letter;
+                _scrambledLetters.remove(letter);
+                _slotColors[index] = Colors.blue;
+                _isCorrect[index] = true;
+                _playSound('word_puzzle/drop.mp3');
+              } else {
+                _slotColors[index] = Colors.red;
+                _isCorrect[index] = false;
+                _playSound('alphabet-sounds/wrong.mp3');
+              }
+            });
 
-              if (_isPuzzleComplete()) {
-                _confettiController.play();
-                _score += 1; // ✅ Add 1 point when the puzzle is fully completed
-                _saveScore(); // Save Score after complete puzzle
-                await _playSound('stories/sound/win.mp3'); // Play Win Sound at the end
+            if (_isPuzzleComplete()) {
+              _confettiController.play();
+              setState(() {
+                _score += 1;
+              });
+              await _saveScore();
+              await _playSound('stories/sound/win.mp3');
+
+              if (_score >= 15) {
+                setState(() {
+                  _gameCompleted = true;
+                });
+                _showCompletionDialog();
+              } else {
                 Future.delayed(Duration(seconds: 2), () {
-                  _initializePuzzle(); // Reset Puzzle
+                  _initializePuzzle();
                 });
               }
-            },
+            }
+          },
         );
       }),
     );
   }
-
-
 
   Widget _buildResetButton() {
     return ElevatedButton(

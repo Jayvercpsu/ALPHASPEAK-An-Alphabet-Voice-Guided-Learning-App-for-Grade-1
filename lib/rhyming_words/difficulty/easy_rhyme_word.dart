@@ -86,36 +86,101 @@ class _EasyRhymeScreen extends State<EasyRhymeScreen> {
     await flutterTts.speak('Find the word that rhymes with $_targetWord');
   }
 
+  void _showCompletionDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: Text('Congratulations! 🎉'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('You completed all 15 words!'),
+            SizedBox(height: 10),
+            Text('Final Score: $_score/15'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.pop(context); // Go back to previous screen
+            },
+            child: Text('Back'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _resetScore();
+              _randomizeWords();
+              _speakTargetWord();
+            },
+            child: Text('New Game'),
+          ),
+        ],
+      ),
+    );
+  }
+
+
   Future<void> _handleSelection(String selectedWord) async {
     if (_isAnimating) return;
+    await _audioPlayer.stop();
 
-    await _audioPlayer.stop(); // Stop any currently playing audio
+    String correctWord = correctRhymingWordsEasy[_targetWord]!;
 
-    if (selectedWord == correctRhymingWordsEasy[_targetWord]) {
-      setState(() {
-        _wordStates[selectedWord] = true;
-        _isAnimating = true;
-        _score++;
-      });
+    if (_score >= 15) {
+      _showCompletionDialog(); // Show completion dialog instead of new game dialog
+      return;
+    }
+
+    setState(() {
+      _isAnimating = true;
+    });
+
+    if (selectedWord == correctWord) {
+      _wordStates[selectedWord] = true;
+      _score++;
       _confettiController.play();
       await _saveScore();
       await _playAudio('alphabet-sounds/correct.mp3');
       await flutterTts.speak('Correct!');
-
       await Future.delayed(Duration(seconds: 1));
       _randomizeWords();
       _speakTargetWord();
-      _isAnimating = false;
+      setState(() {
+        _isAnimating = false;
+      });
     } else {
-      setState(() => _wordStates[selectedWord] = false);
-      await _playAudio(
-          'alphabet-sounds/wrong.mp3'); // Play wrong audio instantly
-      await flutterTts.stop(); // Stop any ongoing TTS before speaking
-      flutterTts.speak('Wrong!'); // Speak "Wrong!" immediately
-      await Future.delayed(Duration(milliseconds: 500));
-      setState(() => _wordStates[selectedWord] = null);
+      _wordStates[selectedWord] = false;
+      _wordStates[correctWord] = true;
+      await _playAudio('alphabet-sounds/wrong.mp3');
+      await flutterTts.stop();
+      await flutterTts.speak('Wrong!');
+
+      // Blink correct word 2x green
+      for (int i = 0; i < 2; i++) {
+        await Future.delayed(Duration(milliseconds: 300));
+        setState(() {
+          _wordStates[correctWord] = null;
+        });
+        await Future.delayed(Duration(milliseconds: 300));
+        setState(() {
+          _wordStates[correctWord] = true;
+        });
+      }
+
+      // Proceed to next word
+      await Future.delayed(Duration(milliseconds: 600));
+      _randomizeWords();
+      _speakTargetWord();
+      setState(() {
+        _isAnimating = false;
+      });
     }
   }
+
+
 
   @override
   void dispose() {

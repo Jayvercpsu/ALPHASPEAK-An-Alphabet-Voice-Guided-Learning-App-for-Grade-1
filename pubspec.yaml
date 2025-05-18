@@ -9,14 +9,12 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_tts: ^3.6.3
-  speech_to_text: ^6.6.1
-  audioplayers: ^6.1.0 # Stable version of audioplayers
-  cupertino_icons: ^1.0.2 # Default icons for iOS
-  voice_assistant: ^1.0.1
+  speech_to_text: ^7.0.0  # Keep latest
+  audioplayers: ^6.1.0
+  cupertino_icons: ^1.0.2
   permission_handler: ^11.1.0
   google_fonts: ^6.2.1
-  video_player: ^2.9.2
-  video_player_android: ^2.3.3
+  video_player: ^2.9.5
   animate_do: ^3.3.9
   confetti: ^0.8.0
   shared_preferences: ^2.5.2

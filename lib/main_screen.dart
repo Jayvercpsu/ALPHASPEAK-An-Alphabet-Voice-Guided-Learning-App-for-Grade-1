@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'user_info_screen.dart';
 import 'home_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:ui';
@@ -137,7 +138,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => HomeScreen(audioPlayer: _audioPlayer),
+        builder: (context) => UserInfoScreen(audioPlayer: _audioPlayer),
       ),
     );
   }

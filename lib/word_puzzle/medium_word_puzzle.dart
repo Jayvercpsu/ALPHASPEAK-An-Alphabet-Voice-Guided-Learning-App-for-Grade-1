@@ -67,6 +67,9 @@ class _MediumWordPuzzleScreenState extends State<MediumWordPuzzleScreen> with Si
   List<bool?> _isCorrect = [];
 
   void _initializePuzzle() async {
+    // ✅ Skip puzzle generation if score is 15 or more
+    if (_score >= 15) return;
+
     setState(() {
       _targetWord = (_words..shuffle()).first;
       _scrambledLetters = _targetWord.split('')..shuffle();
@@ -77,10 +80,12 @@ class _MediumWordPuzzleScreenState extends State<MediumWordPuzzleScreen> with Si
 
     await Future.delayed(Duration(milliseconds: 500));
 
-
-
-    await _flutterTts.speak("Arrange the letters for $_targetWord");
+    // ✅ Only speak if score is less than 15
+    if (_score < 15) {
+      await _flutterTts.speak("Arrange the letters for $_targetWord");
+    }
   }
+
 
   Future<void> _loadScore() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -129,6 +134,70 @@ class _MediumWordPuzzleScreenState extends State<MediumWordPuzzleScreen> with Si
 
   @override
   Widget build(BuildContext context) {
+    if (_score >= 15 && !_isLoading) {  // Only show congratulations if not loading
+      return Scaffold(
+        appBar: AppBar(
+          title: Text('Medium Word Puzzle 🎈', style: GoogleFonts.poppins(fontSize: 28, color: Colors.white)),
+          backgroundColor: Colors.pinkAccent,
+          iconTheme: IconThemeData(color: Colors.white),
+        ),
+        body: Stack(
+          children: [
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  image: DecorationImage(image: AssetImage('assets/background1.jpg'), fit: BoxFit.cover),
+                ),
+                child: Container(color: Colors.black.withOpacity(0.2)),
+              ),
+            ),
+            Align(
+              alignment: Alignment.center,
+              child: ConfettiWidget(
+                confettiController: _confettiController,
+                blastDirectionality: BlastDirectionality.explosive,
+                shouldLoop: false,
+                numberOfParticles: 20,
+                emissionFrequency: 0.05,
+                colors: [Colors.red, Colors.blue, Colors.green, Colors.orange],
+              ),
+            ),
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text("Congratulations!", style: GoogleFonts.poppins(fontSize: 36, color: Colors.white, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 20),
+                  Text("You've completed all 15 puzzles!", style: GoogleFonts.poppins(fontSize: 24, color: Colors.white)),
+                  SizedBox(height: 40),
+                  ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text("Back to Menu", style: GoogleFonts.poppins(fontSize: 22)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.pinkAccent,
+                      padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () {
+                      _resetScore();
+                      _confettiController.stop(); // Stop any ongoing confetti
+                    },
+                    child: Text("New Game", style: GoogleFonts.poppins(fontSize: 22)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueAccent,
+                      padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -138,12 +207,17 @@ class _MediumWordPuzzleScreenState extends State<MediumWordPuzzleScreen> with Si
         backgroundColor: Colors.pinkAccent,
         iconTheme: IconThemeData(color: Colors.white),
         actions: [
-          IconButton(icon: Icon(Icons.refresh), onPressed: _resetScore),
+          IconButton(
+            icon: Icon(Icons.refresh),
+            onPressed: () {
+              _resetScore();
+              _confettiController.stop();
+            },
+          ),
         ],
       ),
       body: Stack(
         children: [
-          // Background Image with Overlay
           Positioned.fill(
             child: Container(
               decoration: BoxDecoration(
@@ -156,36 +230,6 @@ class _MediumWordPuzzleScreenState extends State<MediumWordPuzzleScreen> with Si
             ),
           ),
 
-          // Loading Indicator
-          if (_isLoading)
-            Center(child: CircularProgressIndicator(color: Colors.pinkAccent))
-          else
-            Center(
-              child: SlideTransition(
-                position: _slideAnimation,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Score: $_score",
-                      style: GoogleFonts.poppins(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.yellow,
-                      ),
-                    ),
-                    SizedBox(height: 20),
-                    _buildWordSlots(),
-                    SizedBox(height: 20),
-                    _buildScrambledLetters(),
-                    SizedBox(height: 20),
-                    _buildResetButton(),
-                  ],
-                ),
-              ),
-            ),
-
-          // Confetti Animation
           Align(
             alignment: Alignment.center,
             child: ConfettiWidget(
@@ -197,11 +241,33 @@ class _MediumWordPuzzleScreenState extends State<MediumWordPuzzleScreen> with Si
               colors: [Colors.red, Colors.blue, Colors.green, Colors.orange],
             ),
           ),
+
+          if (_isLoading)
+            Center(child: CircularProgressIndicator(color: Colors.pinkAccent))
+          else
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "Score: $_score/15",
+                  style: GoogleFonts.poppins(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.yellow,
+                  ),
+                ),
+                SizedBox(height: 20),
+                _buildWordSlots(),
+                SizedBox(height: 20),
+                _buildScrambledLetters(),
+                SizedBox(height: 20),
+                _buildResetButton(),
+              ],
+            ),
         ],
       ),
     );
   }
-
 
   Widget _buildWordSlots() {
     return Row(
@@ -296,11 +362,17 @@ class _MediumWordPuzzleScreenState extends State<MediumWordPuzzleScreen> with Si
   }
 
   Widget _buildResetButton() {
-    return ElevatedButton(
+    return _score >= 15
+        ? Text(
+      "🎉 Congratulations! You completed all 15 words!",
+      style: GoogleFonts.poppins(fontSize: 20, color: Colors.greenAccent, fontWeight: FontWeight.bold),
+    )
+        : ElevatedButton(
       onPressed: _initializePuzzle,
       style: ElevatedButton.styleFrom(backgroundColor: Colors.pinkAccent),
       child: Text("Next Word", style: GoogleFonts.poppins(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
     );
   }
+
 }
 

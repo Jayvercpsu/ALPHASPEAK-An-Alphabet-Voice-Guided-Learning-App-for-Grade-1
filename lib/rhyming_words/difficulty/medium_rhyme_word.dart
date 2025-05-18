@@ -41,13 +41,13 @@ class _MediumRhymeScreen extends State<MediumRhymeScreen> {
   Future<void> _loadScore() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      _score = prefs.getInt('medium_score') ?? 0; // Load Medium Score Only
+      _score = prefs.getInt('medium_score') ?? 0;
     });
   }
 
   Future<void> _saveScore() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setInt('medium_score', _score); // Save Only Medium Score
+    prefs.setInt('medium_score', _score);
   }
 
   Future<void> _playAudio(String path) async {
@@ -82,41 +82,103 @@ class _MediumRhymeScreen extends State<MediumRhymeScreen> {
     setState(() {});
   }
 
-
   Future<void> _speakTargetWord() async {
     await flutterTts.speak('Find the word that rhymes with $_targetWord');
   }
 
+  void _showCompletionDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: Text('Congratulations! 🎉'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('You completed all 15 words!'),
+            SizedBox(height: 10),
+            Text('Final Score: $_score/15'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.pop(context); // Go back to previous screen
+            },
+            child: Text('Back'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _resetScore();
+              _randomizeWords();
+              _speakTargetWord();
+            },
+            child: Text('New Game'),
+          ),
+        ],
+      ),
+    );
+  }
+
+
   Future<void> _handleSelection(String selectedWord) async {
     if (_isAnimating) return;
+    await _audioPlayer.stop();
 
-    await _audioPlayer.stop(); // Stop any currently playing audio
+    String correctWord = correctRhymingWordsMedium[_targetWord]!;
 
-    if (selectedWord == correctRhymingWordsMedium[_targetWord]) {
-      setState(() {
-        _wordStates[selectedWord] = true;
-        _isAnimating = true;
-        _score++;
-      });
+    if (_score >= 15) {
+      _showCompletionDialog(); // Show completion dialog instead of new game dialog
+      return;
+    }
+
+    setState(() {
+      _isAnimating = true;
+    });
+
+    if (selectedWord == correctWord) {
+      _wordStates[selectedWord] = true;
+      _score++;
       _confettiController.play();
       await _saveScore();
       await _playAudio('alphabet-sounds/correct.mp3');
       await flutterTts.speak('Correct!');
-
       await Future.delayed(Duration(seconds: 1));
       _randomizeWords();
       _speakTargetWord();
-      _isAnimating = false;
+      setState(() {
+        _isAnimating = false;
+      });
     } else {
-      setState(() => _wordStates[selectedWord] = false);
-      await _playAudio('alphabet-sounds/wrong.mp3'); // Play wrong audio instantly
-      await flutterTts.stop(); // Stop any ongoing TTS before speaking
-      flutterTts.speak('Wrong!'); // Speak "Wrong!" immediately
-      await Future.delayed(Duration(milliseconds: 500));
-      setState(() => _wordStates[selectedWord] = null);
+      _wordStates[selectedWord] = false;
+      _wordStates[correctWord] = true;
+      await _playAudio('alphabet-sounds/wrong.mp3');
+      await flutterTts.stop();
+      await flutterTts.speak('Wrong!');
+
+      // Blink correct word 2x green
+      for (int i = 0; i < 2; i++) {
+        await Future.delayed(Duration(milliseconds: 300));
+        setState(() {
+          _wordStates[correctWord] = null;
+        });
+        await Future.delayed(Duration(milliseconds: 300));
+        setState(() {
+          _wordStates[correctWord] = true;
+        });
+      }
+
+      // Proceed to next word
+      await Future.delayed(Duration(milliseconds: 600));
+      _randomizeWords();
+      _speakTargetWord();
+      setState(() {
+        _isAnimating = false;
+      });
     }
   }
-
 
   @override
   void dispose() {
@@ -132,7 +194,7 @@ class _MediumRhymeScreen extends State<MediumRhymeScreen> {
       appBar: AppBar(
         backgroundColor: Colors.pinkAccent,
         title: Text(
-          'Medium Words ',
+          'Medium Words',
           style: GoogleFonts.poppins(fontSize: 28, color: Colors.white),
         ),
         actions: [
@@ -151,19 +213,18 @@ class _MediumRhymeScreen extends State<MediumRhymeScreen> {
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 16),
               child: Text(
-                'Score: $_score', // ✅ Clickable score
+                'Score: $_score',
                 style: GoogleFonts.poppins(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white, // ✅ Text color pink for contrast
+                  color: Colors.white,
                 ),
               ),
             ),
           ),
         ],
-        iconTheme: IconThemeData(color: Colors.white), // ✅ Set back button color to pink
+        iconTheme: IconThemeData(color: Colors.white),
       ),
-
       body: Stack(
         children: [
           Positioned.fill(
@@ -203,8 +264,8 @@ class _MediumRhymeScreen extends State<MediumRhymeScreen> {
         Container(
           padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
           decoration: BoxDecoration(
-            color: Colors.pinkAccent.withOpacity(0.8), // Background color
-            borderRadius: BorderRadius.circular(12), // Rounded corners
+            color: Colors.pinkAccent.withOpacity(0.8),
+            borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
                 color: Colors.black26,
@@ -296,7 +357,8 @@ class _MediumRhymeScreen extends State<MediumRhymeScreen> {
         child: Center(
           child: Text(
             word,
-            style: GoogleFonts.poppins(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
+            style: GoogleFonts.poppins(
+                fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
           ),
         ),
       ),
@@ -305,7 +367,7 @@ class _MediumRhymeScreen extends State<MediumRhymeScreen> {
 
   Future<void> _resetScore() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove('medium_score'); // Reset Medium Score Only
+    await prefs.remove('medium_score');
     setState(() {
       _score = 0;
     });

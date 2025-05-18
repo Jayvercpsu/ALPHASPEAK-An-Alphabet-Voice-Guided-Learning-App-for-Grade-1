@@ -23,7 +23,7 @@ class _HardWordPuzzleScreenState extends State<HardWordPuzzleScreen> with Single
     'CABLE', 'FRUIT', 'SNAKE', 'TIGER', 'RIVER', 'MOUNT', 'STORM', 'BRAIN', 'GLASS', 'PLANE'
   ];
 
-  late String _targetWord = ''; // Fixed late initialization
+  late String _targetWord = '';
   late List<String> _scrambledLetters;
   List<String> _userWordLetters = [];
   List<Color> _slotColors = [];
@@ -34,14 +34,13 @@ class _HardWordPuzzleScreenState extends State<HardWordPuzzleScreen> with Single
   late AnimationController _animationController;
   late Animation<Offset> _slideAnimation;
   late AudioPlayer _soundPlayer;
+  bool _gameCompleted = false;
 
   @override
   void initState() {
     super.initState();
-
     _confettiController = ConfettiController(duration: Duration(seconds: 2));
     _soundPlayer = AudioPlayer();
-
     _startLoading();
     _initializeTTS();
     _loadScore();
@@ -49,7 +48,6 @@ class _HardWordPuzzleScreenState extends State<HardWordPuzzleScreen> with Single
     _animationController = AnimationController(vsync: this, duration: Duration(milliseconds: 800));
     _slideAnimation = Tween<Offset>(begin: Offset(0, 1), end: Offset(0, 0))
         .animate(CurvedAnimation(parent: _animationController, curve: Curves.easeOut));
-
     _animationController.forward();
   }
 
@@ -73,12 +71,10 @@ class _HardWordPuzzleScreenState extends State<HardWordPuzzleScreen> with Single
       _userWordLetters = List.filled(_targetWord.length, '');
       _slotColors = List.filled(_targetWord.length, Colors.grey);
       _isLoading = false;
+      _gameCompleted = _score >= 15;
     });
 
     await Future.delayed(Duration(milliseconds: 500));
-
-
-
     await _flutterTts.speak("Arrange the letters for $_targetWord");
   }
 
@@ -86,12 +82,13 @@ class _HardWordPuzzleScreenState extends State<HardWordPuzzleScreen> with Single
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       _score = prefs.getInt('hard_word_score') ?? 0;
+      _gameCompleted = _score >= 15;
     });
   }
 
   Future<void> _saveScore() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setInt('hard_word_score', _score);
+    await prefs.setInt('hard_word_score', _score);
   }
 
   void _resetScore() async {
@@ -99,8 +96,10 @@ class _HardWordPuzzleScreenState extends State<HardWordPuzzleScreen> with Single
     if (confirmReset) {
       setState(() {
         _score = 0;
+        _gameCompleted = false;
       });
       await _saveScore();
+      _initializePuzzle();
     }
   }
 
@@ -129,6 +128,70 @@ class _HardWordPuzzleScreenState extends State<HardWordPuzzleScreen> with Single
 
   @override
   Widget build(BuildContext context) {
+    if (_gameCompleted && !_isLoading) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text('Hard Word Puzzle 🎈', style: GoogleFonts.poppins(fontSize: 28, color: Colors.white)),
+          backgroundColor: Colors.pinkAccent,
+          iconTheme: IconThemeData(color: Colors.white),
+        ),
+        body: Stack(
+          children: [
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  image: DecorationImage(image: AssetImage('assets/background1.jpg'), fit: BoxFit.cover),
+                ),
+                child: Container(color: Colors.black.withOpacity(0.2)),
+              ),
+            ),
+            Align(
+              alignment: Alignment.center,
+              child: ConfettiWidget(
+                confettiController: _confettiController,
+                blastDirectionality: BlastDirectionality.explosive,
+                shouldLoop: false,
+                numberOfParticles: 20,
+                emissionFrequency: 0.05,
+                colors: [Colors.red, Colors.blue, Colors.green, Colors.orange],
+              ),
+            ),
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text("Congratulations!", style: GoogleFonts.poppins(fontSize: 36, color: Colors.white, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 20),
+                  Text("You've completed all 15 puzzles!", style: GoogleFonts.poppins(fontSize: 24, color: Colors.white)),
+                  SizedBox(height: 40),
+                  ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text("Back to Menu", style: GoogleFonts.poppins(fontSize: 22)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.pinkAccent,
+                      padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () {
+                      _resetScore();
+                      _confettiController.stop();
+                    },
+                    child: Text("New Game", style: GoogleFonts.poppins(fontSize: 22)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueAccent,
+                      padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -138,12 +201,17 @@ class _HardWordPuzzleScreenState extends State<HardWordPuzzleScreen> with Single
         backgroundColor: Colors.pinkAccent,
         iconTheme: IconThemeData(color: Colors.white),
         actions: [
-          IconButton(icon: Icon(Icons.refresh), onPressed: _resetScore),
+          IconButton(
+            icon: Icon(Icons.refresh),
+            onPressed: () {
+              _resetScore();
+              _confettiController.stop();
+            },
+          ),
         ],
       ),
       body: Stack(
         children: [
-          // Background Image with Overlay
           Positioned.fill(
             child: Container(
               decoration: BoxDecoration(
@@ -156,7 +224,18 @@ class _HardWordPuzzleScreenState extends State<HardWordPuzzleScreen> with Single
             ),
           ),
 
-          // Loading Indicator
+          Align(
+            alignment: Alignment.center,
+            child: ConfettiWidget(
+              confettiController: _confettiController,
+              blastDirectionality: BlastDirectionality.explosive,
+              shouldLoop: false,
+              numberOfParticles: 20,
+              emissionFrequency: 0.05,
+              colors: [Colors.red, Colors.blue, Colors.green, Colors.orange],
+            ),
+          ),
+
           if (_isLoading)
             Center(child: CircularProgressIndicator(color: Colors.pinkAccent))
           else
@@ -167,7 +246,7 @@ class _HardWordPuzzleScreenState extends State<HardWordPuzzleScreen> with Single
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "Score: $_score",
+                      "Score: $_score/15",
                       style: GoogleFonts.poppins(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
@@ -184,24 +263,10 @@ class _HardWordPuzzleScreenState extends State<HardWordPuzzleScreen> with Single
                 ),
               ),
             ),
-
-          // Confetti Animation
-          Align(
-            alignment: Alignment.center,
-            child: ConfettiWidget(
-              confettiController: _confettiController,
-              blastDirectionality: BlastDirectionality.explosive,
-              shouldLoop: false,
-              numberOfParticles: 20,
-              emissionFrequency: 0.05,
-              colors: [Colors.red, Colors.blue, Colors.green, Colors.orange],
-            ),
-          ),
         ],
       ),
     );
   }
-
 
   Widget _buildWordSlots() {
     return Row(
@@ -248,19 +313,22 @@ class _HardWordPuzzleScreenState extends State<HardWordPuzzleScreen> with Single
               _confettiController.play();
               await _playSound('stories/sound/win.mp3');
               setState(() {
-                _score += 1; // ✅ Add Score Only After Completion
+                _score += 1;
+                _gameCompleted = _score >= 15;
                 _saveScore();
               });
-              Future.delayed(Duration(seconds: 2), () {
-                _initializePuzzle();
-              });
+
+              if (!_gameCompleted) {
+                Future.delayed(Duration(seconds: 2), () {
+                  _initializePuzzle();
+                });
+              }
             }
           },
         );
       }),
     );
   }
-
 
   Widget _buildScrambledLetters() {
     return Wrap(
@@ -299,5 +367,13 @@ class _HardWordPuzzleScreenState extends State<HardWordPuzzleScreen> with Single
       child: Text("Next Word", style: GoogleFonts.poppins(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
     );
   }
-}
 
+  @override
+  void dispose() {
+    _confettiController.dispose();
+    _animationController.dispose();
+    _soundPlayer.dispose();
+    _flutterTts.stop();
+    super.dispose();
+  }
+}
