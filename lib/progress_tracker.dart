@@ -114,7 +114,10 @@ class _ProgressTrackerState extends State<ProgressTracker> {
             children: [
               ElevatedButton(
                 onPressed: _toggleEdit,
-                child: Text('Save'),
+                child: Text(
+                  'Save',
+                  style: TextStyle(color: Colors.white), // Add white text
+                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.deepOrange,
                 ),
@@ -125,7 +128,10 @@ class _ProgressTrackerState extends State<ProgressTracker> {
                     _isEditing = false;
                   });
                 },
-                child: Text('Cancel'),
+                child: Text(
+                  'Cancel',
+                  style: TextStyle(color: Colors.white), // Add white text
+                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.grey,
                 ),
@@ -195,12 +201,75 @@ class _ProgressTrackerState extends State<ProgressTracker> {
           _buildActivityProgress('Rhyming Words', widget.progressData['Rhyming Words']),
           SizedBox(height: 16),
           _buildActivityProgress('Word Puzzle', widget.progressData['Word Puzzle']),
-          SizedBox(height: 16),
-          _buildActivityProgress('Stories', widget.progressData['Stories']),
         ],
       ),
     );
   }
+
+  Widget _buildDifficultyProgressWithFeedback(String difficulty, Map<String, dynamic> data, int actualScore) {
+    final feedback = data['feedback'] ?? ''; // Get the feedback from progress data
+    final status = _calculateStatus(actualScore, data['total']);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              flex: 2,
+              child: Text(
+                difficulty,
+                style: GoogleFonts.poppins(
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 3,
+              child: LinearProgressIndicator(
+                value: actualScore / data['total'],
+                backgroundColor: Colors.grey[300],
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  _getStatusColor(status),
+                ),
+                minHeight: 20,
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            SizedBox(width: 8),
+            Text(
+              '$actualScore/${data['total']}',
+              style: GoogleFonts.poppins(
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            SizedBox(width: 8),
+            Text(
+              status,
+              style: GoogleFonts.poppins(
+                color: _getStatusColor(status),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+        // Add the feedback text below the progress bar
+        if (feedback.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 4.0),
+            child: Text(
+              feedback,
+              style: GoogleFonts.poppins(
+                fontSize: 12,
+                color: Colors.grey[700],
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
 
   Widget _buildActivityProgress(String title, Map<String, dynamic> data) {
     final date = DateTime.parse(data['date']);
@@ -224,13 +293,13 @@ class _ProgressTrackerState extends State<ProgressTracker> {
         ),
         SizedBox(height: 8),
         if (title == 'Rhyming Words') ...[
-          _buildDifficultyProgressWithActualScore('Easy', data['Easy'], _rhymeScores['easy'] ?? 0),
-          _buildDifficultyProgressWithActualScore('Medium', data['Medium'], _rhymeScores['medium'] ?? 0),
-          _buildDifficultyProgressWithActualScore('Hard', data['Hard'], _rhymeScores['hard'] ?? 0),
+          _buildDifficultyProgressWithFeedback('Easy', data['Easy'], _rhymeScores['easy'] ?? 0),
+          _buildDifficultyProgressWithFeedback('Medium', data['Medium'], _rhymeScores['medium'] ?? 0),
+          _buildDifficultyProgressWithFeedback('Hard', data['Hard'], _rhymeScores['hard'] ?? 0),
         ] else if (title == 'Word Puzzle') ...[
-          _buildDifficultyProgressWithActualScore('Easy', data['Easy'], _wordPuzzleScores['easy'] ?? 0),
-          _buildDifficultyProgressWithActualScore('Medium', data['Medium'], _wordPuzzleScores['medium'] ?? 0),
-          _buildDifficultyProgressWithActualScore('Hard', data['Hard'], _wordPuzzleScores['hard'] ?? 0),
+          _buildDifficultyProgressWithFeedback('Easy', data['Easy'], _wordPuzzleScores['easy'] ?? 0),
+          _buildDifficultyProgressWithFeedback('Medium', data['Medium'], _wordPuzzleScores['medium'] ?? 0),
+          _buildDifficultyProgressWithFeedback('Hard', data['Hard'], _wordPuzzleScores['hard'] ?? 0),
         ] else ...[
           _buildDifficultyProgress('Easy', data['Easy']),
           _buildDifficultyProgress('Medium', data['Medium']),
@@ -288,9 +357,10 @@ class _ProgressTrackerState extends State<ProgressTracker> {
 
   String _calculateStatus(int score, int total) {
     double percentage = score / total;
-    if (percentage < 0.5) return 'Failed';
+    if (percentage < 0.5) return 'Keep Going';
     if (percentage < 0.75) return 'Good';
-    return 'Very Good';
+    if (percentage < 0.9) return 'Great';
+    return 'Excellent';
   }
 
   Widget _buildDifficultyProgress(String difficulty, Map<String, dynamic> data) {
@@ -372,12 +442,14 @@ class _ProgressTrackerState extends State<ProgressTracker> {
 
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
-      case 'failed':
+      case 'keep going':
         return Colors.red;
       case 'good':
+        return Colors.orange;
+      case 'great':
+        return Colors.lightGreen;
+      case 'excellent':
         return Colors.green;
-      case 'very good':
-        return Colors.blue;
       default:
         return Colors.black;
     }

@@ -70,30 +70,36 @@ class _HomeScreenState extends State<HomeScreen> {
         if (easyRhymeScore > (_progressData['Rhyming Words']['Easy']['score'] ?? 0)) {
           _progressData['Rhyming Words']['Easy']['score'] = easyRhymeScore;
           _progressData['Rhyming Words']['Easy']['date'] = currentDate;
+          _progressData['Rhyming Words']['Easy']['feedback'] = _getRhymingFeedback(easyRhymeScore, 'Easy');
         }
         if (mediumRhymeScore > (_progressData['Rhyming Words']['Medium']['score'] ?? 0)) {
           _progressData['Rhyming Words']['Medium']['score'] = mediumRhymeScore;
           _progressData['Rhyming Words']['Medium']['date'] = currentDate;
+          _progressData['Rhyming Words']['Medium']['feedback'] = _getRhymingFeedback(mediumRhymeScore, 'Medium');
         }
         if (hardRhymeScore > (_progressData['Rhyming Words']['Hard']['score'] ?? 0)) {
           _progressData['Rhyming Words']['Hard']['score'] = hardRhymeScore;
           _progressData['Rhyming Words']['Hard']['date'] = currentDate;
+          _progressData['Rhyming Words']['Hard']['feedback'] = _getRhymingFeedback(hardRhymeScore, 'Hard');
         }
 
         if (easyWordScore > (_progressData['Word Puzzle']['Easy']['score'] ?? 0)) {
           _progressData['Word Puzzle']['Easy']['score'] = easyWordScore;
           _progressData['Word Puzzle']['Easy']['date'] = currentDate;
+          _progressData['Word Puzzle']['Easy']['feedback'] = _getWordPuzzleFeedback(easyWordScore, 'Easy');
         }
         if (mediumWordScore > (_progressData['Word Puzzle']['Medium']['score'] ?? 0)) {
           _progressData['Word Puzzle']['Medium']['score'] = mediumWordScore;
           _progressData['Word Puzzle']['Medium']['date'] = currentDate;
+          _progressData['Word Puzzle']['Medium']['feedback'] = _getWordPuzzleFeedback(mediumWordScore, 'Medium');
         }
         if (hardWordScore > (_progressData['Word Puzzle']['Hard']['score'] ?? 0)) {
           _progressData['Word Puzzle']['Hard']['score'] = hardWordScore;
           _progressData['Word Puzzle']['Hard']['date'] = currentDate;
+          _progressData['Word Puzzle']['Hard']['feedback'] = _getWordPuzzleFeedback(hardWordScore, 'Hard');
         }
 
-        // Update all statuses
+        // Update all statuses and feedback
         _updateAllStatuses();
       });
     } else {
@@ -101,21 +107,15 @@ class _HomeScreenState extends State<HomeScreen> {
         _progressData = {
           'Rhyming Words': {
             'date': currentDate,
-            'Easy': _createProgressEntry(easyRhymeScore, 15),
-            'Medium': _createProgressEntry(mediumRhymeScore, 15),
-            'Hard': _createProgressEntry(hardRhymeScore, 15),
+            'Easy': _createProgressEntry(easyRhymeScore, 15, 'Easy', true),
+            'Medium': _createProgressEntry(mediumRhymeScore, 15, 'Medium', true),
+            'Hard': _createProgressEntry(hardRhymeScore, 15, 'Hard', true),
           },
           'Word Puzzle': {
             'date': currentDate,
-            'Easy': _createProgressEntry(easyWordScore, 15),
-            'Medium': _createProgressEntry(mediumWordScore, 15),
-            'Hard': _createProgressEntry(hardWordScore, 15),
-          },
-          'Stories': {
-            'date': currentDate,
-            'Easy': {'score': 0, 'total': 15, 'status': 'Failed'},
-            'Medium': {'score': 6, 'total': 15, 'status': 'Good'},
-            'Hard': {'score': 9, 'total': 15, 'status': 'Very Good'},
+            'Easy': _createProgressEntry(easyWordScore, 15, 'Easy', false),
+            'Medium': _createProgressEntry(mediumWordScore, 15, 'Medium', false),
+            'Hard': _createProgressEntry(hardWordScore, 15, 'Hard', false),
           },
         };
         _saveProgressData();
@@ -123,38 +123,88 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Map<String, dynamic> _createProgressEntry(int score, int total) {
+  Map<String, dynamic> _createProgressEntry(int score, int total, String difficulty, bool isRhyming) {
     return {
       'score': score,
       'total': total,
       'status': _calculateStatus(score, total),
+      'feedback': isRhyming
+          ? _getRhymingFeedback(score, difficulty)
+          : _getWordPuzzleFeedback(score, difficulty),
     };
   }
 
+  String _getRhymingFeedback(int score, String difficulty) {
+    double percentage = score / 15;
+
+    if (percentage == 1.0) {
+      return 'Great! All $difficulty rhymes done! 🎉';
+    } else if (percentage >= 0.8) {
+      return 'Nice! You almost got all $difficulty rhymes.';
+    } else if (percentage >= 0.6) {
+      return 'Good! Keep going with $difficulty rhymes.';
+    } else if (percentage >= 0.4) {
+      return 'Keep practicing $difficulty rhymes.';
+    } else {
+      return 'Try more $difficulty rhymes.';
+    }
+  }
+
+  String _getWordPuzzleFeedback(int score, String difficulty) {
+    double percentage = score / 15;
+
+    if (percentage == 1.0) {
+      return 'Awesome! All $difficulty puzzles done! 🏆';
+    } else if (percentage >= 0.8) {
+      return 'Great! Almost nailed $difficulty puzzles.';
+    } else if (percentage >= 0.6) {
+      return 'Good work on $difficulty puzzles.';
+    } else if (percentage >= 0.4) {
+      return 'Keep at those $difficulty puzzles.';
+    } else {
+      return 'Try more $difficulty puzzles.';
+    }
+  }
+
   void _updateAllStatuses() {
-    // Update status for all activities and difficulties
+    // Update status and feedback for all activities and difficulties
     _progressData['Rhyming Words']['Easy']['status'] =
         _calculateStatus(_progressData['Rhyming Words']['Easy']['score'], 15);
+    _progressData['Rhyming Words']['Easy']['feedback'] =
+        _getRhymingFeedback(_progressData['Rhyming Words']['Easy']['score'], 'Easy');
+
     _progressData['Rhyming Words']['Medium']['status'] =
         _calculateStatus(_progressData['Rhyming Words']['Medium']['score'], 15);
+    _progressData['Rhyming Words']['Medium']['feedback'] =
+        _getRhymingFeedback(_progressData['Rhyming Words']['Medium']['score'], 'Medium');
+
     _progressData['Rhyming Words']['Hard']['status'] =
         _calculateStatus(_progressData['Rhyming Words']['Hard']['score'], 15);
+    _progressData['Rhyming Words']['Hard']['feedback'] =
+        _getRhymingFeedback(_progressData['Rhyming Words']['Hard']['score'], 'Hard');
 
     _progressData['Word Puzzle']['Easy']['status'] =
         _calculateStatus(_progressData['Word Puzzle']['Easy']['score'], 15);
+    _progressData['Word Puzzle']['Easy']['feedback'] =
+        _getWordPuzzleFeedback(_progressData['Word Puzzle']['Easy']['score'], 'Easy');
+
     _progressData['Word Puzzle']['Medium']['status'] =
         _calculateStatus(_progressData['Word Puzzle']['Medium']['score'], 15);
+    _progressData['Word Puzzle']['Medium']['feedback'] =
+        _getWordPuzzleFeedback(_progressData['Word Puzzle']['Medium']['score'], 'Medium');
+
     _progressData['Word Puzzle']['Hard']['status'] =
         _calculateStatus(_progressData['Word Puzzle']['Hard']['score'], 15);
-
-    // Stories status remains static as per your initial implementation
+    _progressData['Word Puzzle']['Hard']['feedback'] =
+        _getWordPuzzleFeedback(_progressData['Word Puzzle']['Hard']['score'], 'Hard');
   }
 
   String _calculateStatus(int score, int total) {
     double percentage = score / total;
-    if (percentage < 0.5) return 'Failed';
+    if (percentage < 0.5) return 'Keep Going';
     if (percentage < 0.75) return 'Good';
-    return 'Very Good';
+    if (percentage < 0.9) return 'Great';
+    return 'Excellent';
   }
 
   Future<void> _saveProgressData() async {
@@ -234,34 +284,69 @@ class _HomeScreenState extends State<HomeScreen> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      // Profile icon
                       IconButton(
                         icon: Icon(Icons.person, size: 32, color: Colors.white),
                         onPressed: _toggleProgressView,
                       ),
-                      Row(
-                        children: [
-                          if (_username.isNotEmpty || _section.isNotEmpty)
-                            Padding(
-                              padding: const EdgeInsets.only(right: 8.0),
-                              child: Text(
-                                '$_username - $_section',
-                                style: GoogleFonts.poppins(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          IconButton(
-                            icon: Image.asset(
-                              _isMuted ? 'assets/unmute.png' : 'assets/mute.png',
-                              width: 32,
-                              height: 32,
-                            ),
-                            onPressed: _toggleMute,
+
+                      // Name and section (right next to profile icon)
+                      if (_username.isNotEmpty || _section.isNotEmpty)
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          margin: EdgeInsets.only(right: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.deepOrange.withOpacity(0.8),
+                            borderRadius: BorderRadius.circular(20),
                           ),
-                        ],
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (_username.isNotEmpty)
+                                Text(
+                                  _username,
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              if (_username.isNotEmpty && _section.isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                                  child: Text(
+                                    '-',
+                                    style: GoogleFonts.poppins(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              if (_section.isNotEmpty)
+                                Text(
+                                  _section,
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+
+                      // Spacer to push mute button to the end
+                      Spacer(),
+
+                      // Mute button
+                      IconButton(
+                        icon: Image.asset(
+                          _isMuted ? 'assets/unmute.png' : 'assets/mute.png',
+                          width: 32,
+                          height: 32,
+                        ),
+                        onPressed: _toggleMute,
                       ),
                     ],
                   ),
